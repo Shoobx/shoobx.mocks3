@@ -20,9 +20,6 @@ src/*.egg-info
 *.pyc
 *.pyo
 
-# Common src packages
-src/shoobx.app
-
 # Files dumped by some stupid package.
 COPYRIGHT
 LICENSE
