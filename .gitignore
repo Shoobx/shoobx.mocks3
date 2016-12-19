@@ -1,0 +1,28 @@
+bin/
+build/
+htmlcov/
+include/
+js/
+lib/
+local/
+man/
+selenium/
+share/
+testreports/
+var/
+
+.coverage
+.virtualenv
+pip-selfcheck.json
+coverage.xml
+src/*.egg-info
+
+*.pyc
+*.pyo
+
+# Common src packages
+src/shoobx.app
+
+# Files dumped by some stupid package.
+COPYRIGHT
+LICENSE

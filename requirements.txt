@@ -1,0 +1,3 @@
+# shoobx.mocks3
+-e . [test]
+
