@@ -1,5 +1,4 @@
-=====================
-Shoobx Moxk S3 Server
+Shoobx Mock S3 Server
 =====================
 
 This package implements a mock S3 server including bucket shadowing
