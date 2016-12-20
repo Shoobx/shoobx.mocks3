@@ -134,7 +134,8 @@ class Key(models.FakeKey):
         r = {
             'etag': self.etag,
             'last-modified': self.last_modified_RFC1123,
-        }
+            'access-control-allow-origin': '*'
+            }
         if self.storage_class != 'STANDARD':
             r['x-amz-storage-class'] = self.storage_class
         if self.expiry_date is not None:
