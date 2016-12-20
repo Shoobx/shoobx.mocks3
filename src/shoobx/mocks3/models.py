@@ -558,11 +558,8 @@ class Bucket(object):
 
 class ShoobxS3Backend(models.S3Backend):
 
-    directory = './data'
-
     def __init__(self):
         self.directory = './data'
-        pass
 
     def create_bucket(self, bucket_name, region_name):
         new_bucket = Bucket(self, bucket_name)
@@ -581,32 +578,6 @@ class ShoobxS3Backend(models.S3Backend):
         if not bucket.exists():
             raise models.MissingBucket(bucket=bucket_name)
         return bucket
-
-    def prefix_query(self, bucket, prefix, delimiter):
-        key_results = set()
-        folder_results = set()
-        if prefix:
-            for key_name, key in bucket.keys.items():
-                if key_name.startswith(prefix):
-                    key_without_prefix = key_name.replace(prefix, "", 1)
-                    if delimiter and delimiter in key_without_prefix:
-                        # If delimiter, we need to split out folder_results
-                        key_without_delimiter = key_without_prefix.split(delimiter)[0]
-                        folder_results.add("{0}{1}{2}".format(prefix, key_without_delimiter, delimiter))
-                    else:
-                        key_results.add(key)
-        else:
-            for key_name, key in bucket.keys.items():
-                if delimiter and delimiter in key_name:
-                    # If delimiter, we need to split out folder_results
-                    folder_results.add(key_name.split(delimiter)[0] + delimiter)
-                else:
-                    key_results.add(key)
-
-        key_results = sorted(key_results, key=lambda key: key.name)
-        folder_results = [folder_name for folder_name in sorted(folder_results, key=lambda key: key)]
-
-        return key_results, folder_results
 
     def delete_bucket(self, bucket_name):
         bucket = Bucket(self, bucket_name)
