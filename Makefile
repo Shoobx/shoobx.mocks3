@@ -23,7 +23,6 @@ help:
 	@echo "= Jenkins ="
 	@echo "make test-jenkins"
 	@echo "make test-jenkins-with-coverage"
-	@echo "make diff-cover"
 
 .PHONY: clean
 clean:
@@ -78,12 +77,6 @@ test-jenkins-with-coverage: .virtualenv
 	   | bin/python scripts/subunit2pyunit.py -vvv
 	bin/coverage xml --include '*/shoobx/mocks3/*'  --omit='*/test*'
 	bin/coverage html --include '*/shoobx/mocks3/*' --omit='*/test*'
-
-.PHONY: diff-cover
-diff-cover: .virtualenv
-	bin/coverage-test -c
-	bin/coverage xml --include '*/shoobx/mocks3/*' --omit='*/test*'
-	bin/diff-cover coverage.xml --html-report report.html
 
 .PHONY: coverage
 coverage: .virtualenv

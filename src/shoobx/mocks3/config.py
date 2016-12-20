@@ -10,6 +10,8 @@ import logging
 import os
 from moto import server
 
+from shoobx.mocks3 import models
+
 _CONFIG = None
 CONFIG_FILE = None
 
@@ -46,12 +48,13 @@ def configure(config_file):
     # Setup logging.
     logging.basicConfig(level=config.get('shoobx:mocks3', 'log-level'))
 
-    register_resources()
-
-    # Create the Flask app.
-    log.info("Starting...")
+    directory = config.get('shoobx:mocks3', 'directory')
+    models.s3_sbx_backend.directory = directory
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     app = server.DomainDispatcherApplication(
         server.create_backend_app, service='s3-sbx')
 
-    return app
+    return app.get_application(
+        config.get('shoobx:mocks3', 'hostname'))

@@ -53,8 +53,12 @@ setup(
     ],
     extras_require=dict(
         test=[
+            'coverage',
+            'freezegun',
+            'junitxml',
+            'mock',
             'python-subunit',
-            'junitxml'],
+            'zope.testrunner'],
         dev=['ipdb', 'pdbpp'],
     ),
     entry_points={

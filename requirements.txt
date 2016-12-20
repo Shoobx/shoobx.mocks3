@@ -1,3 +1,10 @@
 # shoobx.mocks3
 -e . [test]
 
+coverage == 4.2
+freezegun == 0.3.8
+junitxml == 0.7
+mock == 2.0.0
+moto[server,test] == 0.4.30
+python-subunit == 1.2.0
+zope.testrunner == 4.5.1
