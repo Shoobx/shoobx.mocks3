@@ -49,7 +49,7 @@ setup(
     ],
     install_requires=[
         'boto3',
-        'moto',
+        'moto[server]',
     ],
     extras_require=dict(
         test=[
