@@ -26,6 +26,10 @@ url_paths = {
     u'{0}/$':
         S3ResponseInstance.bucket_response,
 
+    # Expose the storage directory
+    u'{0}/STORAGE_DIR$':
+        S3ResponseInstance.get_storage_dir,
+
     # subdomain key of path-based bucket
     u'{0}/(?P<key_or_bucket_name>[^/]+)/?$':
         S3ResponseInstance.ambiguous_response,
