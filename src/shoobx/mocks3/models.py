@@ -570,7 +570,7 @@ class ShoobxS3Backend(models.S3Backend):
 
     def get_all_buckets(self):
         return [
-            Bucket(self, fn)
+            Bucket(self, fn[:-7])
             for fn in os.listdir(self.directory)
             if fn.endswith('.bucket')]
 
