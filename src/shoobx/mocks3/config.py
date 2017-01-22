@@ -33,7 +33,11 @@ def load_config(config_path):
     global _CONFIG
     if _CONFIG is not None:
         return _CONFIG
-    _CONFIG = ConfigParser.ConfigParser()
+    # Environment variabel expansion/interpolation a la supervisor.
+    _CONFIG = ConfigParser.ConfigParser(defaults = {
+        'ENV_'+k: v
+        for k, v in os.environ.items()
+    })
 
     # Load from config files. It will load from all files, with last one
     # winning if there are multiple files.
