@@ -697,7 +697,7 @@ class BotoTestCase(unittest.TestCase):
         contentsEqual(b'9', '99-')
 
         # Explicitly bounded range requests starting from the first byte.
-        contentsEqual('0', '0-0')
+        contentsEqual(b'0', '0-0')
         contentsEqual(rep * 5, '0-49')
         contentsEqual(rep * 10, '0-99')
         contentsEqual(rep * 10, '0-100')

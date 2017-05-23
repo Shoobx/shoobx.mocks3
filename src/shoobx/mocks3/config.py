@@ -5,10 +5,15 @@
 ###############################################################################
 """Application Configuration
 """
-import ConfigParser
 import logging
 import os
 from moto import server
+
+try:
+    import ConfigParser as configparser  # Py2
+except ImportError:
+    import configparser  # Py3
+
 
 from shoobx.mocks3 import models
 
@@ -34,7 +39,7 @@ def load_config(config_path):
     if _CONFIG is not None:
         return _CONFIG
     # Environment variabel expansion/interpolation a la supervisor.
-    _CONFIG = ConfigParser.ConfigParser(defaults = {
+    _CONFIG = configparser.ConfigParser(defaults = {
         'ENV_'+k: v
         for k, v in os.environ.items()
     })

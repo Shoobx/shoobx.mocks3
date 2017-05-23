@@ -2,10 +2,10 @@
 CHANGELOG
 =========
 
-1.1.1 (unreleased)
+1.2.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add support for Python 3.5, 3.6 and PyPy.
 
 
 1.1.0 (2017-05-23)

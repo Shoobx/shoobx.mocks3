@@ -99,18 +99,20 @@ class Key(models.FakeKey):
 
     @property
     def value(self):
-        with open(self._value_path, 'r') as file:
+        with open(self._value_path, 'rb') as file:
             return file.read()
 
     @value.setter
     def value(self, data):
-        with open(self._value_path, 'w') as file:
+        if not isinstance(data, (bytes, bytearray)):
+            data = data.encode('utf-8')
+        with open(self._value_path, 'wb') as file:
             file.write(data)
 
     @property
     def etag(self):
         if self._etag is None:
-            with open(self._value_path, 'r') as file:
+            with open(self._value_path, 'rb') as file:
                 self._etag = hashlib.md5(file.read()).hexdigest()
         return '"{0}"'.format(self._etag)
 
@@ -275,12 +277,12 @@ class Part(object):
 
     @property
     def value(self):
-        with open(self._value_path, 'r') as file:
+        with open(self._value_path, 'rb') as file:
             return file.read()
 
     @value.setter
     def value(self, data):
-        with open(self._value_path, 'w') as file:
+        with open(self._value_path, 'wb') as file:
             file.write(data)
         self.etag = '"{0}"'.format(hashlib.md5(data).hexdigest())
 
@@ -455,12 +457,12 @@ class Bucket(object):
 
     @property
     def info(self):
-        with open(self._info_path, 'r') as file:
+        with open(self._info_path, 'rb') as file:
             return json.load(file)
 
     @info.setter
     def info(self, value):
-        with open(self._info_path, 'w') as file:
+        with open(self._info_path, 'wb') as file:
             return json.dump(value, file)
 
     @property
