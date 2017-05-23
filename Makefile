@@ -53,9 +53,9 @@ test: ve/bin/test
 coverage: ve
 	rm -rf .coverage
 	ve/bin/coverage run $(PWD)/ve/bin/zope-testrunner --test-path $(PWD)/src --all
-	ve/bin/coverage xml --include '*/shoobx/mocks3/*'  --omit='*/test*'
-	ve/bin/coverage html --include '*/shoobx/mocks3/*' --omit='*/test*'
-	ve/bin/coverage report -m --include '*/shoobx/mocks3/*' --omit='*/test*'
+	ve/bin/coverage xml
+	ve/bin/coverage html
+	ve/bin/coverage report -m
 
 .PHONY: run
 run: ve
