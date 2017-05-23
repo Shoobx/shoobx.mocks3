@@ -1,26 +1,10 @@
-bin/
-build/
-data/
-htmlcov/
-include/
-js/
-lib/
-local/
-man/
-selenium/
-share/
-testreports/
-var/
-
 .coverage
-.virtualenv
-pip-selfcheck.json
+.tox
+dist/
+htmlcov/
+ve/
 coverage.xml
 src/*.egg-info
 
 *.pyc
 *.pyo
-
-# Files dumped by some stupid package.
-COPYRIGHT
-LICENSE

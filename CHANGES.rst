@@ -2,10 +2,12 @@
 CHANGELOG
 =========
 
-1.0.2 (unreleased)
+1.1.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- First public release.
+
+- Switched to commuity tools: tox, Travis CI and Coveralls.io
 
 
 1.0.1 (2017-05-15)

@@ -10,8 +10,7 @@ default: all
 help:
 	@echo "= Development ="
 	@echo "make                -- build everything that needs building"
-	@echo "make test           -- run tests in level 1"
-	@echo "make test-all       -- run all tests"
+	@echo "make test           -- run all tests"
 	@echo "make coverage       -- compute test coverage with coverage.py"
 	@echo "make clean          -- Remove runtime generated files."
 	@echo "make real-clean     -- Remove all files not in Git."
@@ -19,14 +18,10 @@ help:
 	@echo "= Deployment ="
 	@echo "make run            -- run the server in foreground mode"
 	@echo "make run-uwsgi      -- run the app using uwsgi"
-	@echo
-	@echo "= Jenkins ="
-	@echo "make test-jenkins"
-	@echo "make test-jenkins-with-coverage"
 
 .PHONY: clean
 clean:
-	rm -rf bin/ include/ lib/ local/ share/ pip-selfcheck.json
+	rm -rf ve/ pip-selfcheck.json
 
 .PHONY: real-clean
 real-clean:
@@ -36,59 +31,36 @@ real-clean:
 	    src/img2pdf src/migrant src/pjpersist src/z3c.insist src/zodb \
 	    src/zope.i18n src/zope.wfmc
 
-.virtualenv: setup.py requirements.txt
-	rm -rf bin/ include/ lib/ local/ share/ pip-selfcheck.json
-	virtualenv -p $(PYTHON) .
-	bin/pip install --upgrade pip
-	bin/pip install --upgrade setuptools==$(SETUPTOOLS_VERSION)
-	bin/pip install setuptools==$(SETUPTOOLS_VERSION) # for debian stable
-	bin/pip install -r ./requirements.txt
-	touch .virtualenv
+ve: setup.py requirements.txt
+	rm -rf ve/
+	virtualenv -p $(PYTHON) ve
+	ve/bin/pip install --upgrade pip
+	ve/bin/pip install --upgrade setuptools==$(SETUPTOOLS_VERSION)
+	ve/bin/pip install setuptools==$(SETUPTOOLS_VERSION) # for debian stable
+	ve/bin/pip install -r ./requirements.txt
 
-bin/test:
-	printf "#!/bin/bash\n$(PWD)/bin/zope-testrunner --test-path $(PWD)/src \$$@\n" > bin/test
-	chmod 755 bin/test
+ve/bin/test:
+	printf "#!/bin/bash\n$(PWD)/ve/bin/zope-testrunner --test-path $(PWD)/src \$$@\n" > ve/bin/test
+	chmod 755 ve/bin/test
 
-all: .virtualenv bin/test
+all: ve ve/bin/test
 
 .PHONY: test
-test: bin/test
-	bin/test -vpc1
-
-.PHONY: test-all
-test-all: bin/test
-	bin/test -vpc1 --all
-
-.PHONY: test-jenkins
-test-jenkins: .virtualenv bin/test
-	mkdir -p parts/test/testreports/
-	rm -rf parts/test/testreports/*.xml
-	bin/test --all --subunit \
-	  | bin/python scripts/subunit2junit.py parts/test/testreports/all.xml \
-	  | bin/python scripts/subunit2pyunit.py -vvv
-
-.PHONY: test-jenkins-with-coverage
-test-jenkins-with-coverage: .virtualenv
-	mkdir -p testreports/
-	rm -rf testreports/*.xml
-	-bin/coverage run \
-             $(PWD)/bin/zope-testrunner --test-path $(PWD)/src --all --subunit \
-	   | bin/python scripts/subunit2junit.py testreports/all.xml \
-	   | bin/python scripts/subunit2pyunit.py -vvv
-	bin/coverage xml --include '*/shoobx/mocks3/*'  --omit='*/test*'
-	bin/coverage html --include '*/shoobx/mocks3/*' --omit='*/test*'
+test: ve/bin/test
+	ve/bin/test -vpc1 --all
 
 .PHONY: coverage
-coverage: .virtualenv
-	rm .coverage
-	-bin/coverage run $(PWD)/bin/zope-testrunner --test-path $(PWD)/src --all
-	bin/coverage xml --include '*/shoobx/mocks3/*'  --omit='*/test*'
-	bin/coverage html --include '*/shoobx/mocks3/*' --omit='*/test*'
+coverage: ve
+	rm -rf .coverage
+	ve/bin/coverage run $(PWD)/ve/bin/zope-testrunner --test-path $(PWD)/src --all
+	ve/bin/coverage xml --include '*/shoobx/mocks3/*'  --omit='*/test*'
+	ve/bin/coverage html --include '*/shoobx/mocks3/*' --omit='*/test*'
+	ve/bin/coverage report -m --include '*/shoobx/mocks3/*' --omit='*/test*'
 
 .PHONY: run
-run:
-	bin/sbx-mocks3-serve -c config/mocks3.cfg
+run: ve
+	ve/bin/sbx-mocks3-serve -c config/mocks3.cfg
 
 .PHONY: run-uwsgi
-run-uwsgi: .virtualenv
+run-uwsgi: ve
 	uwsgi ./config/uwsgi.ini --need-app

@@ -17,12 +17,12 @@ def read(fname):
 
 setup(
     name="shoobx.mocks3",
-    version='1.0.2.dev0',
+    version='1.1.0.dev0',
     author="Shoobx, Inc.",
     author_email="dev@shoobx.com",
     description="Shoobx Mock S3 Implementation",
-    long_description=read('README.md'),
-    keywords="amazon aws s3 mock",
+    long_description=read('README.rst'),
+    keywords="amazon aws s3 mock moto",
     license='Proprietary',
     url="http://shoobx.com/",
     packages=find_packages('src'),
