@@ -2,10 +2,13 @@
 CHANGELOG
 =========
 
-1.2.1 (unreleased)
+1.3.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Use `flask_cors` to inject the proper access control headers. This way not
+  only the handled HTTP methods will put the CORS headers in the response, but
+  OPTIONS -- which is used by browsers to check the CORS settings - will also
+  receive the headers.
 
 
 1.2.0 (2017-05-23)

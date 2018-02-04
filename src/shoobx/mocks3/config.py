@@ -8,6 +8,7 @@
 import logging
 import os
 from moto import server
+from flask_cors import CORS
 
 try:
     import ConfigParser as configparser  # Py2
@@ -62,8 +63,13 @@ def configure(config_file):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+    def create_backend_app(service):
+        app = server.create_backend_app(service)
+        CORS(app)
+        return app
+
     app = server.DomainDispatcherApplication(
-        server.create_backend_app, service='s3-sbx')
+        create_backend_app, service='s3-sbx')
 
     return app.get_application(
         config.get('shoobx:mocks3', 'hostname'))
