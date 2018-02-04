@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-1.3.0 (unreleased)
+1.3.0 (2018-02-03)
 ------------------
 
 - Use `flask_cors` to inject the proper access control headers. This way not
