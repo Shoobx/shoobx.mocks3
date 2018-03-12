@@ -35,6 +35,8 @@ class _InfoProperty(object):
             return json.load(file).get(self.name)
 
     def __set__(self, inst, value):
+        if isinstance(value, bytes):
+            value = value.decode('utf-8')
         with open(inst._info_path, 'r') as file:
             info = json.load(file)
         info[self.name] = value
@@ -97,6 +99,10 @@ class Key(models.FakeKey):
     def _version_id(self):
         return self.version
 
+    @_version_id.setter
+    def _version_id(self, value):
+        self.version = value
+
     @property
     def value(self):
         with open(self._value_path, 'rb') as file:
@@ -136,15 +142,16 @@ class Key(models.FakeKey):
         r = {
             'etag': self.etag,
             'last-modified': self.last_modified_RFC1123,
+            'content-length': str(len(self.value)),
             }
-        if self.storage_class != 'STANDARD':
+        if self.storage_class is not None:
             r['x-amz-storage-class'] = self.storage_class
         if self.expiry_date is not None:
             rhdr = 'ongoing-request="false", expiry-date="{0}"'
             r['x-amz-restore'] = rhdr.format(self.expiry_date)
 
         if self.bucket.is_versioned:
-            r['x-amz-version-id'] = self.version
+            r['x-amz-version-id'] = str(self.version)
 
         return r
 
@@ -539,6 +546,8 @@ class Bucket(object):
         os.remove(self._lifecyle_path)
 
     def set_website_configuration(self, website_configuration):
+        if isinstance(website_configuration, bytes):
+            website_configuration = website_configuration.decode('utf-8')
         if website_configuration is None:
             os.remove(self._ws_config_path)
             return

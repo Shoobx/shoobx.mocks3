@@ -2,10 +2,10 @@
 CHANGELOG
 =========
 
-1.3.1 (unreleased)
+1.4.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Upgraded to support `moto == 1.2.0`.
 
 
 1.3.0 (2018-02-03)

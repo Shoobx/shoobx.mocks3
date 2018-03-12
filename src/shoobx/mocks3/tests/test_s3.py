@@ -22,7 +22,7 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from boto.exception import S3CreateError, S3ResponseError
 from freezegun import freeze_time
-from moto.core.models import MockAWS
+from moto.core.models import HttprettyMockAWS
 from moto.s3.models import ALL_USERS_GRANTEE
 from six.moves.urllib.error import HTTPError
 from six.moves.urllib.request import urlopen
@@ -52,7 +52,7 @@ def reduced_min_part_size(f):
 class BotoTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.mock_aws = MockAWS({'global': models.s3_sbx_backend})
+        self.mock_aws = HttprettyMockAWS({'global': models.s3_sbx_backend})
         self.mock_aws.start()
         self._dir = tempfile.mkdtemp()
         self.data_dir_patch = mock.patch(
@@ -432,8 +432,8 @@ class BotoTestCase(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             requests.patch("https://s3.amazonaws.com/foobar")
 
-
     def test_key_method_not_implemented(self):
+        self.conn.create_bucket("foobar")
         with self.assertRaises(NotImplementedError):
             requests.post("https://s3.amazonaws.com/foobar/foo")
 
