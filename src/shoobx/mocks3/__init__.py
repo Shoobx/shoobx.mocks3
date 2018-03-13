@@ -12,6 +12,6 @@ __version__ = get_distribution('shoobx.mocks3').version
 from moto.backends import BACKENDS
 from .models import s3_sbx_backend
 
-BACKENDS['s3-sbx'] = s3_sbx_backend
+BACKENDS['s3-sbx'] = {'global': s3_sbx_backend}
 
 mock_s3_sbx = s3_sbx_backend.decorator

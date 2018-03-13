@@ -71,5 +71,6 @@ def configure(config_file):
     app = server.DomainDispatcherApplication(
         create_backend_app, service='s3-sbx')
 
-    return app.get_application(
-        config.get('shoobx:mocks3', 'hostname'))
+    return app.get_application({
+        'HTTP_HOST': config.get('shoobx:mocks3', 'hostname'),
+    })
