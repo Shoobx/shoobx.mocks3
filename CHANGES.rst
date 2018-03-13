@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-1.4.1 (unreleased)
+1.4.1 (2018-03-12)
 ------------------
 
 - Tweak server startup to work with new moto APIs. Added test to verify app
