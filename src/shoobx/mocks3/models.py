@@ -49,7 +49,7 @@ class _AclProperty(_InfoProperty):
     def __get__(self, inst, cls):
         raw_data = super(_AclProperty, self).__get__(inst, cls)
         if raw_data is None:
-            return
+            return models.get_canned_acl('private')
         return models.FakeAcl([
             models.FakeGrant(
                 [models.FakeGrantee(**grantee)

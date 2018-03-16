@@ -15,17 +15,21 @@ from shoobx.mocks3 import config
 class ShoobxRequestHandler(werkzeug.serving.WSGIRequestHandler):
 
     def log_request(self, code='-', size=None):
-        size = size or self.environ.get('shoobx.response_size', '-')
+        # Allow logging errors even before the environ attribute gets set.
+        environ = getattr(self, 'environ', {})
+        size = size or environ.get('shoobx.response_size', '-')
         self.log(
             'info', '"%s" %s %s - %s',
             self.requestline, code, size,
-            self.environ.get('HTTP_USER_AGENT', '-').split(' ')[0])
+            environ.get('HTTP_USER_AGENT', '-').split(' ')[0])
 
     def log(self, type, message, *args):
+        # Allow logging errors even before the environ attribute gets set.
+        environ = getattr(self, 'environ', {})
         werkzeug.serving._log(
             type, '%s - %s [%s] %s\n' % (
                 self.address_string(),
-                self.environ.get('shoobx.user', '-'),
+                environ.get('shoobx.user', '-'),
                 self.log_date_time_string(),
                 message % args))
 

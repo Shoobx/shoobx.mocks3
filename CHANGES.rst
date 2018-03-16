@@ -5,7 +5,8 @@ CHANGELOG
 1.4.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Another small tweak needed to work in new moto. A key now always expects
+  an ACL.
 
 
 1.4.1 (2018-03-12)
