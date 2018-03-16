@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-1.4.2 (unreleased)
+1.4.2 (2018-03-16)
 ------------------
 
 - Another small tweak needed to work in new moto. A key now always expects
