@@ -379,20 +379,26 @@ class BotoTestCase(unittest.TestCase):
         self.assertEqual(3, len(buckets))
 
     def test_post_to_bucket(self):
-        requests.post("https://s3.amazonaws.com/mybucket", {
-            'key': 'the-key',
-            'file': 'nothing'
-        })
+        requests.post(
+            "https://s3.amazonaws.com/mybucket",
+            {
+                'key': 'the-key',
+                'file': 'nothing'
+            },
+            verify=False)
         self.assertEqual(
             b'nothing',
             self.bucket.get_key('the-key').get_contents_as_string())
 
     def test_post_with_metadata_to_bucket(self):
-        requests.post("https://s3.amazonaws.com/mybucket", {
-            'key': 'the-key',
-            'file': 'nothing',
-            'x-amz-meta-test': 'metadata'
-        })
+        requests.post(
+            "https://s3.amazonaws.com/mybucket",
+            {
+                'key': 'the-key',
+                'file': 'nothing',
+                'x-amz-meta-test': 'metadata'
+            },
+            verify=False)
         self.assertEqual(
             'metadata',
             self.bucket.get_key('the-key').get_metadata('test'))
@@ -430,12 +436,12 @@ class BotoTestCase(unittest.TestCase):
 
     def test_bucket_method_not_implemented(self):
         with self.assertRaises(NotImplementedError):
-            requests.patch("https://s3.amazonaws.com/foobar")
+            requests.patch("https://s3.amazonaws.com/foobar", verify=False)
 
     def test_key_method_not_implemented(self):
         self.conn.create_bucket("foobar")
         with self.assertRaises(NotImplementedError):
-            requests.post("https://s3.amazonaws.com/foobar/foo")
+            requests.post("https://s3.amazonaws.com/foobar/foo", verify=False)
 
     def test_bucket_name_with_dot(self):
         bucket = self.conn.create_bucket('firstname.lastname')

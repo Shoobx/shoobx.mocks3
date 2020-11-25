@@ -5,6 +5,10 @@ coverage == 4.5.1
 freezegun == 0.3.10
 junitxml == 0.7
 mock == 2.0.0
-moto[server,test] == 1.2.0
+moto == 1.2.0
 python-subunit == 1.2.0
 zope.testrunner == 4.8.1
+requests == 2.18.4
+boto3 == 1.6.0
+botocore == 1.9.0
+aws-xray-sdk == 0.96
