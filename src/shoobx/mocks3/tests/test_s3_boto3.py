@@ -87,7 +87,12 @@ class BotoTestCase(unittest.TestCase):
     def test_boto3_bucket_create_eu_central(self):
         self.s3 = boto3.resource('s3', region_name='eu-central-1',
             config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(Bucket="blah")
+        self.s3.create_bucket(
+            Bucket="blah",
+            CreateBucketConfiguration={
+                'LocationConstraint': 'eu-central-1'
+            }
+        )
 
         self.s3.Object('blah', 'hello.txt').put(Body="some text")
 

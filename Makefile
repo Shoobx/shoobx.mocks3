@@ -1,5 +1,5 @@
 # Default values for user options
-PYTHON := python2.7
+PYTHON ?= python3
 SETUPTOOLS_VERSION := 18.1
 PARENT_DIR := $(realpath $(PWD)/..)
 

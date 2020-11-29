@@ -13,9 +13,14 @@ import hashlib
 import json
 import os
 import shutil
+import pytz
+import requests.structures
 
 from moto.cloudformation.exceptions import UnformattedGetAttTemplateException
 from moto.s3 import models
+from moto.core.utils import iso_8601_datetime_with_milliseconds
+from moto.core.utils import iso_8601_datetime_without_milliseconds_s3
+from moto.core.utils import rfc_1123_datetime
 
 def _encode_name(name):
     return name.replace('/', '__sl__')
@@ -86,14 +91,18 @@ class Key(models.FakeKey):
     expiry_date = _InfoProperty('expiry_date')
     acl = _AclProperty('acl')
 
-    def __init__(self, bucket, name, version=0):
+    def __init__(self, bucket, name, version=0, is_versioned=False,
+                 multipart=None, bucket_name=None):
         self.bucket = bucket
         self.name = name
         self.version = version
+        self._is_versioned = is_versioned
+        self.multipart = multipart
         self._path = os.path.join(bucket._path, 'keys', _encode_name(name))
         self._versioned_path = os.path.join(self._path, str(version))
         self._info_path = os.path.join(self._versioned_path, 'info.json')
         self._value_path = os.path.join(self._versioned_path, 'value')
+        self.bucket_name = bucket_name
 
     @property
     def _version_id(self):
@@ -135,7 +144,7 @@ class Key(models.FakeKey):
     def last_modified_RFC1123(self):
         # Different datetime formats depending on how the key is obtained
         # https://github.com/boto/boto/issues/466
-        return models.rfc_1123_datetime(self.last_modified)
+        return rfc_1123_datetime(self.last_modified)
 
     @property
     def response_dict(self):
@@ -168,7 +177,7 @@ class Key(models.FakeKey):
         self.value = value
         with open(self._info_path, 'w') as file:
             json.dump({
-                'last_modified': models.iso_8601_datetime_with_milliseconds(
+                'last_modified': iso_8601_datetime_without_milliseconds_s3(
                     datetime.datetime.utcnow()),
                 'storage_class': storage,
                 'metadata': {},
@@ -180,12 +189,13 @@ class Key(models.FakeKey):
     def delete(self):
         shutil.rmtree(self._path)
 
-    def copy(self, new_name=None):
+    def copy(self, new_name=None, new_is_versioned=None):
         new_path = os.path.join(self.bucket._path, 'keys', new_name)
         os.mkdir(new_path)
         new_versioned_path = os.path.join(new_path, str(self.version))
         shutil.copytree(self._versioned_path, new_versioned_path)
-        return Key(self.bucket, new_name, version=self.version)
+        return Key(self.bucket, new_name, version=self.version,
+                   is_versioned=new_is_versioned)
 
     def set_metadata(self, metadata, replace=False):
         md = self.metadata if not replace else {}
@@ -203,7 +213,7 @@ class Key(models.FakeKey):
             old_path = self._versioned_path
             self.__init__(self.bucket, self.name, self.version+1)
             os.rename(old_path, self._versioned_path)
-            self.create()
+            self.create(value)
 
         self.value += self.value
         self.last_modified = datetime.datetime.utcnow()
@@ -238,7 +248,7 @@ class VersionedKeyStore(collections.MutableMapping):
 
     def __setitem__(self, name, key):
         if not key.exists():
-            key.create()
+            key.create(key.value)
 
     def __delitem__(self, name):
         key = Key(self.bucket, name)
@@ -309,7 +319,7 @@ class Part(object):
     def last_modified_RFC1123(self):
         # Different datetime formats depending on how the key is obtained
         # https://github.com/boto/boto/issues/466
-        return models.rfc_1123_datetime(self.last_modified)
+        return rfc_1123_datetime(self.last_modified)
 
     @property
     def response_dict(self):
@@ -323,7 +333,7 @@ class Part(object):
             os.makedirs(self._path)
         with open(self._info_path, 'w') as file:
             json.dump({
-                'last_modified': models.iso_8601_datetime_with_milliseconds(
+                'last_modified': iso_8601_datetime_with_milliseconds(
                     datetime.datetime.utcnow()),
                 'etag': None
             }, file)
@@ -355,10 +365,13 @@ class Multipart(object):
         if not os.path.exists(self._path):
             os.makedirs(self._path)
         with open(self._info_path, 'w') as file:
+            # Make metadata json serialization friendly
+            if isinstance(metadata, requests.structures.CaseInsensitiveDict):
+                metadata = dict(metadata)
             json.dump({
                 'key_name': key_name,
                 'metadata': metadata
-                }, file)
+            }, file)
 
     def delete(self):
         if not os.path.exists(self._path):
@@ -460,6 +473,7 @@ class Bucket(object):
         self._lifecyle_path = os.path.join(self._path, 'lifecycle.json')
         self._ws_config_path = os.path.join(
             self._path, 'website_configuration.xml')
+        self.creation_date = datetime.datetime.now(tz=pytz.utc)
 
     @property
     def info(self):
@@ -571,6 +585,7 @@ class ShoobxS3Backend(models.S3Backend):
 
     def __init__(self):
         self.directory = './data'
+        super(ShoobxS3Backend, self).__init__()
 
     def create_bucket(self, bucket_name, region_name):
         new_bucket = Bucket(self, bucket_name)
@@ -594,7 +609,8 @@ class ShoobxS3Backend(models.S3Backend):
         bucket = Bucket(self, bucket_name)
         return bucket.delete()
 
-    def set_key(self, bucket_name, key_name, value, storage=None, etag=None):
+    def set_object(self, bucket_name, key_name, value, storage=None, etag=None,
+                   multipart=None):
         key_name = models.clean_key_name(key_name)
 
         bucket = self.get_bucket(bucket_name)
@@ -605,7 +621,13 @@ class ShoobxS3Backend(models.S3Backend):
         else:
             new_version = 0
 
-        new_key = Key(bucket, key_name, new_version)
+        new_key = Key(
+            bucket,
+            key_name,
+            version = new_version,
+            is_versioned=bucket.is_versioned,
+            multipart=multipart
+        )
         new_key.create(
             value=value,
             storage=storage,
@@ -617,6 +639,7 @@ class ShoobxS3Backend(models.S3Backend):
         bucket = self.get_bucket(bucket_name)
         new_multipart = Multipart(bucket)
         new_multipart.create(key_name, metadata)
+        bucket.multiparts[new_multipart.id] = new_multipart
         return new_multipart
 
     def complete_multipart(self, bucket_name, multipart_id, body):
@@ -626,7 +649,10 @@ class ShoobxS3Backend(models.S3Backend):
         if value is None:
             return
 
-        key = self.set_key(bucket_name, multipart.key_name, value, etag=etag)
+        key = self.set_object(
+            bucket_name, multipart.key_name, value, etag=etag,
+            multipart=multipart
+        )
         key.set_metadata(multipart.metadata)
 
         del bucket.multiparts[multipart_id]
