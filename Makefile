@@ -1,6 +1,5 @@
 # Default values for user options
-PYTHON := python2.7
-SETUPTOOLS_VERSION := 18.1
+PYTHON ?= python3
 PARENT_DIR := $(realpath $(PWD)/..)
 
 .PHONY: default
@@ -35,8 +34,7 @@ ve: setup.py requirements.txt
 	rm -rf ve/
 	virtualenv -p $(PYTHON) ve
 	ve/bin/pip install --upgrade pip
-	ve/bin/pip install --upgrade setuptools==$(SETUPTOOLS_VERSION)
-	ve/bin/pip install setuptools==$(SETUPTOOLS_VERSION) # for debian stable
+	ve/bin/pip install --upgrade setuptools
 	ve/bin/pip install -r ./requirements.txt
 
 ve/bin/test:

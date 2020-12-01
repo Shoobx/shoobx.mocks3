@@ -13,7 +13,6 @@ import functools
 import io
 import json
 import mock
-import os
 import requests
 import shutil
 import tempfile
@@ -379,20 +378,24 @@ class BotoTestCase(unittest.TestCase):
         self.assertEqual(3, len(buckets))
 
     def test_post_to_bucket(self):
-        requests.post("https://s3.amazonaws.com/mybucket", {
-            'key': 'the-key',
-            'file': 'nothing'
-        })
+        requests.post(
+            "https://s3.amazonaws.com/mybucket",
+            {
+                'key': 'the-key',
+                'file': 'nothing'
+            })
         self.assertEqual(
             b'nothing',
             self.bucket.get_key('the-key').get_contents_as_string())
 
     def test_post_with_metadata_to_bucket(self):
-        requests.post("https://s3.amazonaws.com/mybucket", {
-            'key': 'the-key',
-            'file': 'nothing',
-            'x-amz-meta-test': 'metadata'
-        })
+        requests.post(
+            "https://s3.amazonaws.com/mybucket",
+            {
+                'key': 'the-key',
+                'file': 'nothing',
+                'x-amz-meta-test': 'metadata'
+            })
         self.assertEqual(
             'metadata',
             self.bucket.get_key('the-key').get_metadata('test'))
@@ -434,7 +437,7 @@ class BotoTestCase(unittest.TestCase):
 
     def test_key_method_not_implemented(self):
         self.conn.create_bucket("foobar")
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(KeyError):
             requests.post("https://s3.amazonaws.com/foobar/foo")
 
     def test_bucket_name_with_dot(self):

@@ -17,7 +17,7 @@ def read(fname):
 
 setup(
     name="shoobx.mocks3",
-    version='1.4.3.dev0',
+    version='1.5.0.dev0',
     author="Shoobx, Inc.",
     author_email="dev@shoobx.com",
     description="Shoobx Mock S3 Implementation",
@@ -39,11 +39,10 @@ setup(
         'Intended Audience :: Developers',
         'License :: Other/Proprietary License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Natural Language :: English',
