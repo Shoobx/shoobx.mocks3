@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-1.5.0 (unreleased)
+1.5.0 (2020-12-01)
 ------------------
 
 - Upgraded to latest pkgs including moto 1.3.16, py3 is now default.
