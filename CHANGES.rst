@@ -2,10 +2,10 @@
 CHANGELOG
 =========
 
-1.5.1 (unreleased)
+1.6.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Upgraded to latest pkgs including moto 2.0.5, added py3.9
 
 
 1.5.0 (2020-12-01)
