@@ -7,6 +7,7 @@ CHANGELOG
 
 - Upgraded to latest pkgs including moto 2.0.5, added py3.9
 
+- Ported all tests to boto3 and removed boto support
 
 1.5.0 (2020-12-01)
 ------------------
