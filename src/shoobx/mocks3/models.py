@@ -521,21 +521,21 @@ class Bucket(object):
     def rules(self):
         if not os.path.exists(self._lifecyle_path):
             return []
+        rules = []
         with open(self._lifecyle_path, 'r') as file:
             raw_rules = json.load(file)
-        rules = []
-        for rule in rules:
-            expiration = rule.get('Expiration')
-            transition = rule.get('Transition')
-            self.rules.append(models.LifecycleRule(
+        for rule in raw_rules:
+            exp = rule.get('Expiration')
+            tran = rule.get('Transition')
+            rules.append(models.LifecycleRule(
                 id=rule.get('ID'),
                 prefix=rule['Prefix'],
                 status=rule['Status'],
-                expiration_days=expiration.get('Days') if expiration else None,
-                expiration_date=expiration.get('Date') if expiration else None,
-                transition_days=transition.get('Days') if transition else None,
-                transition_date=transition.get('Date') if transition else None,
-                storage_class=transition['StorageClass'] if transition else None,
+                expiration_days=exp.get('Days') if exp else None,
+                expiration_date=exp.get('Date') if exp else None,
+                transition_days=tran.get('Days') if tran else None,
+                transition_date=tran.get('Date') if tran else None,
+                storage_class=tran['StorageClass'] if tran else None,
             ))
         return rules
 

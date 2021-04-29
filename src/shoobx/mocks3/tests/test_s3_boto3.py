@@ -818,3 +818,27 @@ class BotoTestCase(unittest.TestCase):
         self.store_key(key_name, 'some value')
         osummary = list(self.bucket.objects.all())
         self.assertIn(key_name, [s.key for s in osummary])
+
+    def test_bucket_lifecycle_rules(self):
+        cfg = {
+                'Rules': [
+                    {
+                        'Expiration': {
+                            'Days': 365
+                        },
+                        'Transitions': [
+                            {
+                                'Days': 90,
+                                'StorageClass': 'STANDARD_IA'
+                            }
+                        ],
+                        'ID': 'rule1',
+                        'Prefix': 'path/',
+                        'Status': 'Enabled'
+                    }
+                ]
+            }
+        self.bucket.LifecycleConfiguration().put(LifecycleConfiguration=cfg)
+        self.assertEqual(
+            cfg['Rules'],
+            self.bucket.LifecycleConfiguration().rules)
