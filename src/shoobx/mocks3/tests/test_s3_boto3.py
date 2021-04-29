@@ -643,11 +643,9 @@ class BotoTestCase(unittest.TestCase):
         self.assertEqual('1', self.bucket.Object('the-key').version_id)
         rsp = self.s3.list_object_versions(Bucket="mybucket", Prefix="the-key")
         self.assertEqual(2, len(rsp['Versions']))
-        self.assertEqual('the-key', rsp['Versions'][0]['Key'])
-        self.assertEqual('0', rsp['Versions'][0]['VersionId'])
-        self.assertEqual('the-key', rsp['Versions'][1]['Key'])
-        self.assertEqual('1', rsp['Versions'][1]['VersionId'])
-
+        self.assertEqual(
+            [('0', 'the-key'), ('1', 'the-key')],
+            sorted([(v['VersionId'], v['Key']) for v in rsp['Versions']]))
         rsp = self.bucket.Object('the-key').get(VersionId='0')
         self.assertEqual(b'Version 1', rsp['Body'].read())
         rsp = self.bucket.Object('the-key').get(VersionId='1')
