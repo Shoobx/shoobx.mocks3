@@ -9,6 +9,8 @@ CHANGELOG
 
 - Ported all tests to boto3 and removed boto support
 
+- Fixed bucket lifecycle cfg
+
 1.5.0 (2020-12-01)
 ------------------
 
