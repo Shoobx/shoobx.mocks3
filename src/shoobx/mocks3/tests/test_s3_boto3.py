@@ -820,7 +820,3 @@ class BotoTestCase(unittest.TestCase):
         self.store_key(key_name, 'some value')
         osummary = list(self.bucket.objects.all())
         self.assertIn(key_name, [s.key for s in osummary])
-
-
-
-
