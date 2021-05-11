@@ -91,8 +91,17 @@ class Key(models.FakeKey):
     expiry_date = _InfoProperty('expiry_date')
     acl = _AclProperty('acl')
 
-    def __init__(self, bucket, name, version=0, is_versioned=False,
-                 multipart=None, bucket_name=None):
+    def __init__(self,
+                 bucket,
+                 name,
+                 version = 0,
+                 is_versioned = False,
+                 multipart = None,
+                 bucket_name=None,
+                 encryption = None,
+                 kms_key_id = None,
+                 bucket_key_enabled = None
+                 ):
         self.bucket = bucket
         self.name = name
         self.version = version
@@ -103,6 +112,9 @@ class Key(models.FakeKey):
         self._info_path = os.path.join(self._versioned_path, 'info.json')
         self._value_path = os.path.join(self._versioned_path, 'value')
         self.bucket_name = bucket_name
+        self.encryption = encryption
+        self.kms_key_id = kms_key_id
+        self.bucket_key_enabled = bucket_key_enabled
 
     @property
     def _version_id(self):
@@ -509,21 +521,21 @@ class Bucket(object):
     def rules(self):
         if not os.path.exists(self._lifecyle_path):
             return []
+        rules = []
         with open(self._lifecyle_path, 'r') as file:
             raw_rules = json.load(file)
-        rules = []
-        for rule in rules:
-            expiration = rule.get('Expiration')
-            transition = rule.get('Transition')
-            self.rules.append(models.LifecycleRule(
+        for rule in raw_rules:
+            exp = rule.get('Expiration')
+            tran = rule.get('Transition')
+            rules.append(models.LifecycleRule(
                 id=rule.get('ID'),
                 prefix=rule['Prefix'],
                 status=rule['Status'],
-                expiration_days=expiration.get('Days') if expiration else None,
-                expiration_date=expiration.get('Date') if expiration else None,
-                transition_days=transition.get('Days') if transition else None,
-                transition_date=transition.get('Date') if transition else None,
-                storage_class=transition['StorageClass'] if transition else None,
+                expiration_days=exp.get('Days') if exp else None,
+                expiration_date=exp.get('Date') if exp else None,
+                transition_days=tran.get('Days') if tran else None,
+                transition_date=tran.get('Date') if tran else None,
+                storage_class=tran['StorageClass'] if tran else None,
             ))
         return rules
 
@@ -609,8 +621,17 @@ class ShoobxS3Backend(models.S3Backend):
         bucket = Bucket(self, bucket_name)
         return bucket.delete()
 
-    def set_object(self, bucket_name, key_name, value, storage=None, etag=None,
-                   multipart=None):
+    def set_object(self,
+                   bucket_name,
+                   key_name,
+                   value,
+                   storage=None,
+                   etag=None,
+                   multipart=None,
+                   encryption=None,
+                   kms_key_id=None,
+                   bucket_key_enabled=None,
+                   ):
         key_name = models.clean_key_name(key_name)
 
         bucket = self.get_bucket(bucket_name)
@@ -626,7 +647,10 @@ class ShoobxS3Backend(models.S3Backend):
             key_name,
             version = new_version,
             is_versioned=bucket.is_versioned,
-            multipart=multipart
+            multipart=multipart,
+            encryption=encryption,
+            kms_key_id=kms_key_id,
+            bucket_key_enabled=bucket_key_enabled,
         )
         new_key.create(
             value=value,
