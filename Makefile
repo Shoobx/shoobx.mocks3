@@ -32,7 +32,7 @@ real-clean:
 
 ve: setup.py requirements.txt
 	rm -rf ve/
-	virtualenv -p $(PYTHON) ve
+	$(PYTHON) -m venv ve/
 	ve/bin/pip install --upgrade pip
 	ve/bin/pip install --upgrade setuptools
 	ve/bin/pip install -r ./requirements.txt
