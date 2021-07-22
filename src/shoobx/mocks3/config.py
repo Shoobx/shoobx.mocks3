@@ -39,7 +39,7 @@ def load_config(config_path):
     global _CONFIG
     if _CONFIG is not None:
         return _CONFIG
-    # Environment variabel expansion/interpolation a la supervisor.
+    # Environment variable expansion/interpolation a la supervisor.
     _CONFIG = configparser.ConfigParser(defaults = {
         'ENV_'+k: v
         for k, v in os.environ.items()
@@ -56,7 +56,11 @@ def configure(config_file):
     config = load_config(config_file)
 
     # Setup logging.
-    logging.basicConfig(level=config.get('shoobx:mocks3', 'log-level'))
+    filename = None
+    if config.has_option('shoobx:mocks3', 'log-file'):
+        filename = config.get('shoobx:mocks3', 'log-file')
+    logging.basicConfig(
+        filename=filename, level=config.get('shoobx:mocks3', 'log-level'))
 
     directory = config.get('shoobx:mocks3', 'directory')
     models.s3_sbx_backend.directory = directory

@@ -5,7 +5,7 @@ CHANGELOG
 1.6.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added `log-file` config option.
 
 
 1.6.0 (2021-05-11)
