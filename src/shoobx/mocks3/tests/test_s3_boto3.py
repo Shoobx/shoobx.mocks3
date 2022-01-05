@@ -33,16 +33,16 @@ def reduced_min_part_size(f):
     """ speed up tests by temporarily making the multipart minimum part size
         small
     """
-    import moto.s3.models as s3model
-    orig_size = s3model.UPLOAD_PART_MIN_SIZE
+    from moto import settings as msettings
+    orig_size = msettings.S3_UPLOAD_PART_MIN_SIZE
 
     @functools.wraps(f)
     def wrapped(self, *args, **kwargs):
         try:
-            s3model.UPLOAD_PART_MIN_SIZE = REDUCED_PART_SIZE
+            msettings.S3_UPLOAD_PART_MIN_SIZE = REDUCED_PART_SIZE
             return f(self, *args, **kwargs)
         finally:
-            s3model.UPLOAD_PART_MIN_SIZE = orig_size
+            msettings.S3_UPLOAD_PART_MIN_SIZE = orig_size  # noqa
     return wrapped
 
 class BotoTestCase(unittest.TestCase):
@@ -519,8 +519,8 @@ class BotoTestCase(unittest.TestCase):
             Bucket="mybucket",
             Delete={'Objects': [{'Key': 'abc'}, {'Key': 'file3'}]})
 
-        self.assertEqual(1, len(rsp['Deleted']))
-        self.assertEqual(1, len(rsp['Errors']))
+        # Moto no longer errors when there is an invalid key
+        self.assertEqual(2, len(rsp['Deleted']), "Incorrect deletion length")
         osummary = list(self.bucket.objects.all())
         self.assertEqual(3, len(osummary))
         self.assertEqual('file1', osummary[0].key)

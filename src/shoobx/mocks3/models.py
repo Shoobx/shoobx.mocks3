@@ -16,6 +16,7 @@ import shutil
 import pytz
 import requests.structures
 
+from moto import settings
 from moto.cloudformation.exceptions import UnformattedGetAttTemplateException
 from moto.s3 import models
 from moto.core.utils import iso_8601_datetime_with_milliseconds
@@ -81,7 +82,6 @@ class _AclProperty(_InfoProperty):
             json.dump(info, file)
 
 
-
 class Key(models.FakeKey):
 
     _last_modified = _InfoProperty('last_modified')
@@ -94,13 +94,13 @@ class Key(models.FakeKey):
     def __init__(self,
                  bucket,
                  name,
-                 version = 0,
-                 is_versioned = False,
-                 multipart = None,
+                 version=0,
+                 is_versioned=False,
+                 multipart=None,
                  bucket_name=None,
-                 encryption = None,
-                 kms_key_id = None,
-                 bucket_key_enabled = None
+                 encryption=None,
+                 kms_key_id=None,
+                 bucket_key_enabled=None
                  ):
         self.bucket = bucket
         self.name = name
@@ -141,7 +141,7 @@ class Key(models.FakeKey):
         if self._etag is None:
             with open(self._value_path, 'rb') as file:
                 self._etag = hashlib.md5(file.read()).hexdigest()
-        return '"{0}"'.format(self._etag)
+        return '"{}"'.format(self._etag)
 
     @property
     def last_modified(self):
@@ -240,10 +240,10 @@ class Key(models.FakeKey):
         key_dir = os.path.join(bucket._path, 'keys', _encode_name(name))
         if not os.path.exists(key_dir):
             return []
-        return sorted([
+        return sorted((
             Key(bucket, name, int(version))
             for version in os.listdir(key_dir)
-            ], key=lambda k: k.version)
+            ), key=lambda k: k.version)
 
 
 class VersionedKeyStore(collections.MutableMapping):
@@ -312,7 +312,7 @@ class Part(object):
     def value(self, data):
         with open(self._value_path, 'wb') as file:
             file.write(data)
-        self.etag = '"{0}"'.format(hashlib.md5(data).hexdigest())
+        self.etag = '"{}"'.format(hashlib.md5(data).hexdigest())
 
     @property
     def size(self):
@@ -403,7 +403,7 @@ class Multipart(object):
             if part is None or part.etag != etag:
                 raise models.InvalidPart()
             if last is not None and \
-                    len(last.value) < models.UPLOAD_PART_MIN_SIZE:
+                    len(last.value) < settings.S3_UPLOAD_PART_MIN_SIZE:
                 raise models.EntityTooSmall()
             part_etag = part.etag.replace('"', '')
             md5s.extend(decode_hex(part_etag)[0])
@@ -413,7 +413,7 @@ class Multipart(object):
 
         etag = hashlib.md5()
         etag.update(bytes(md5s))
-        return total, "{0}-{1}".format(etag.hexdigest(), count)
+        return total, "{}-{}".format(etag.hexdigest(), count)
 
     def get_part(self, part_id):
         part = Part(self, part_id)
@@ -430,9 +430,9 @@ class Multipart(object):
         return part
 
     def list_parts(self):
-        parts = sorted([
+        parts = sorted((
             fn[:-5] for fn in os.listdir(self._path)
-            if fn.endswith('.part')],
+            if fn.endswith('.part')),
             key = lambda v: int(v))
         for part in parts:
                 yield self.get_part(part)
@@ -597,7 +597,7 @@ class ShoobxS3Backend(models.S3Backend):
 
     def __init__(self):
         self.directory = './data'
-        super(ShoobxS3Backend, self).__init__()
+        super().__init__()
 
     def create_bucket(self, bucket_name, region_name):
         new_bucket = Bucket(self, bucket_name)
@@ -645,7 +645,7 @@ class ShoobxS3Backend(models.S3Backend):
         new_key = Key(
             bucket,
             key_name,
-            version = new_version,
+            version=new_version,
             is_versioned=bucket.is_versioned,
             multipart=multipart,
             encryption=encryption,
@@ -682,5 +682,6 @@ class ShoobxS3Backend(models.S3Backend):
         del bucket.multiparts[multipart_id]
 
         return key
+
 
 s3_sbx_backend = ShoobxS3Backend()
