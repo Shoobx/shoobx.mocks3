@@ -379,6 +379,7 @@ class Multipart:
 
     key_name = _InfoProperty('key_name')
     metadata = _InfoProperty('metadata')
+    tags = _InfoProperty('tags')
 
     def __init__(self, bucket, id=None):
         self.id = id
@@ -394,7 +395,7 @@ class Multipart:
     def exists(self):
         return os.path.exists(self._path)
 
-    def create(self, key_name, metadata):
+    def create(self, key_name, metadata, tags):
         if not os.path.exists(self._path):
             os.makedirs(self._path)
         with open(self._info_path, 'w') as file:
@@ -403,7 +404,8 @@ class Multipart:
                 metadata = dict(metadata)
             json.dump({
                 'key_name': key_name,
-                'metadata': metadata
+                'metadata': metadata,
+                'tags': tags
             }, file)
 
     def delete(self):
@@ -726,11 +728,11 @@ class ShoobxS3Backend(models.S3Backend):
         return key
 
     def create_multipart_upload(
-        self, bucket_name, key_name, metadata, storage_type
+        self, bucket_name, key_name, metadata, storage_type, tags
     ):
         bucket = self.get_bucket(bucket_name)
         new_multipart = Multipart(bucket, key_name)
-        new_multipart.create(key_name, metadata)
+        new_multipart.create(key_name, metadata, tags)
         new_multipart.storage = storage_type
         bucket.multiparts[new_multipart.id] = new_multipart
         return new_multipart.id

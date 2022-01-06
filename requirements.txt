@@ -5,7 +5,7 @@ coverage == 5.5
 freezegun == 1.0.0
 junit-xml == 1.9
 mock == 4.0.3
-moto == 2.2.13
+moto == 2.2.15
 botocore == 1.23.0
 boto3 == 1.20.0
 python-subunit == 1.4.0
