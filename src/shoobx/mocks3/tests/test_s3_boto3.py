@@ -6,21 +6,22 @@
 """Shoobx S3 Backend
 """
 
-import boto3
 import functools
-from unittest import mock
+import json
 import shutil
 import tempfile
 import unittest
+from unittest import mock
+
+import boto3
 import botocore
 import requests
-import json
 from botocore.client import ClientError, Config
+from freezegun import freeze_time
 from moto.core.models import MockAWS
+from moto.s3.models import ALL_USERS_GRANTEE
 from six.moves.urllib.error import HTTPError
 from six.moves.urllib.request import urlopen
-from freezegun import freeze_time
-from moto.s3.models import ALL_USERS_GRANTEE
 
 from shoobx.mocks3 import models
 

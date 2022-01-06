@@ -7,14 +7,14 @@
 """
 import logging
 import os
-from moto import server
+
 from flask_cors import CORS
+from moto import server
 
 try:
     import ConfigParser as configparser  # Py2
 except ImportError:
     import configparser  # Py3
-
 
 from shoobx.mocks3 import models
 

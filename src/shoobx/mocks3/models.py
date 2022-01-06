@@ -13,15 +13,15 @@ import hashlib
 import json
 import os
 import shutil
+
 import pytz
 import requests.structures
-
 from moto import settings
 from moto.cloudformation.exceptions import UnformattedGetAttTemplateException
+from moto.core.utils import (iso_8601_datetime_with_milliseconds,
+                             iso_8601_datetime_without_milliseconds_s3,
+                             rfc_1123_datetime)
 from moto.s3 import models
-from moto.core.utils import iso_8601_datetime_with_milliseconds
-from moto.core.utils import iso_8601_datetime_without_milliseconds_s3
-from moto.core.utils import rfc_1123_datetime
 
 
 def _encode_name(name):
@@ -639,6 +639,7 @@ class ShoobxS3Backend(models.S3Backend):
     def _url_module(self):
         # Prevent a circular import
         import shoobx.mocks3.urls as backend_urls_module
+
         # No reload is necessary since we don't allow for overwriting urls
         return backend_urls_module
 
