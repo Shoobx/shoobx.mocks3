@@ -10,7 +10,6 @@ import codecs
 import collections
 import datetime
 import hashlib
-from importlib import reload
 import json
 import os
 import shutil
@@ -20,7 +19,7 @@ import requests.structures
 from moto import settings
 from moto.cloudformation.exceptions import UnformattedGetAttTemplateException
 from moto.s3 import models
-from moto.core.utils import iso_8601_datetime_with_milliseconds, unix_time_millis
+from moto.core.utils import iso_8601_datetime_with_milliseconds
 from moto.core.utils import iso_8601_datetime_without_milliseconds_s3
 from moto.core.utils import rfc_1123_datetime
 
@@ -33,7 +32,7 @@ def _decode_name(name):
     return name.replace('__sl__', '/')
 
 
-class _InfoProperty(object):
+class _InfoProperty:
 
     def __init__(self, name):
         self.name = name
@@ -41,13 +40,13 @@ class _InfoProperty(object):
     def __get__(self, inst, cls):
         if not os.path.exists(inst._info_path):
             return None
-        with open(inst._info_path, 'r') as file:
+        with open(inst._info_path) as file:
             return json.load(file).get(self.name)
 
     def __set__(self, inst, value):
         if isinstance(value, bytes):
             value = value.decode('utf-8')
-        with open(inst._info_path, 'r') as file:
+        with open(inst._info_path) as file:
             info = json.load(file)
         info[self.name] = value
         with open(inst._info_path, 'w') as file:
@@ -57,7 +56,7 @@ class _InfoProperty(object):
 class _AclProperty(_InfoProperty):
 
     def __get__(self, inst, cls):
-        raw_data = super(_AclProperty, self).__get__(inst, cls)
+        raw_data = super().__get__(inst, cls)
         if raw_data is None:
             return models.get_canned_acl('private')
         return models.FakeAcl([
@@ -69,7 +68,7 @@ class _AclProperty(_InfoProperty):
         ])
 
     def __set__(self, inst, value):
-        with open(inst._info_path, 'r') as file:
+        with open(inst._info_path) as file:
             info = json.load(file)
         if value is None:
             info[self.name] = None
@@ -130,7 +129,6 @@ class Key(models.FakeKey):
         self.lock_legal_status = lock_legal_status
         self.lock_until = lock_until
 
-
     def __getstate__(self):
         return self.__dict__.copy()
 
@@ -162,7 +160,7 @@ class Key(models.FakeKey):
         if self._etag is None:
             with open(self._value_path, 'rb') as file:
                 self._etag = hashlib.md5(file.read()).hexdigest()
-        return '"{}"'.format(self._etag)
+        return f'"{self._etag}"'
 
     @property
     def last_modified(self):
@@ -261,10 +259,10 @@ class Key(models.FakeKey):
         key_dir = os.path.join(bucket._path, 'keys', _encode_name(name))
         if not os.path.exists(key_dir):
             return []
-        return sorted([
+        return sorted((
             Key(bucket, name, int(version))
             for version in os.listdir(key_dir)
-            ], key=lambda k: k.version)
+            ), key=lambda k: k.version)
 
 
 class VersionedKeyStore(collections.MutableMapping):
@@ -309,7 +307,7 @@ class VersionedKeyStore(collections.MutableMapping):
             yield name, self.getlist(name)
 
 
-class Part(object):
+class Part:
 
     _last_modified = _InfoProperty('last_modified')
     etag = _InfoProperty('etag')
@@ -333,7 +331,7 @@ class Part(object):
     def value(self, data):
         with open(self._value_path, 'wb') as file:
             file.write(data)
-        self.etag = '"{}"'.format(hashlib.md5(data).hexdigest())
+        self.etag = f'"{hashlib.md5(data).hexdigest()}"'
 
     @property
     def size(self):
@@ -437,7 +435,7 @@ class Multipart:
 
         etag = hashlib.md5()
         etag.update(bytes(md5s))
-        return total, "{}-{}".format(etag.hexdigest(), count)
+        return total, f"{etag.hexdigest()}-{count}"
 
     def get_part(self, part_id):
         part = Part(self, part_id)
@@ -487,8 +485,7 @@ class Multiparts(collections.MutableMapping):
     def __iter__(self):
         if not os.path.exists(self._path):
             return
-        for name in os.listdir(self._path):
-            yield name
+        yield from os.listdir(self._path)
 
     def __len__(self):
         return len(os.listdir(self._path))
@@ -559,7 +556,7 @@ class Bucket:
         if not os.path.exists(self._lifecyle_path):
             return []
         rules = []
-        with open(self._lifecyle_path, 'r') as file:
+        with open(self._lifecyle_path) as file:
             raw_rules = json.load(file)
         for rule in raw_rules:
             exp = rule.get('Expiration')
@@ -580,7 +577,7 @@ class Bucket:
     def website_configuration(self):
         if not os.path.exists(self._ws_config_path):
             return []
-        with open(self._ws_config_path, 'r') as file:
+        with open(self._ws_config_path) as file:
             return file.read()
 
     def exists(self):
@@ -640,9 +637,9 @@ class ShoobxS3Backend(models.S3Backend):
 
     @property
     def _url_module(self):
+        # Prevent a circular import
         import shoobx.mocks3.urls as backend_urls_module
-
-        reload(backend_urls_module)
+        # No reload is necessary since we don't allow for overwriting urls
         return backend_urls_module
 
     def create_bucket(self, bucket_name, region_name):
