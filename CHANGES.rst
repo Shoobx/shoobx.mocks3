@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-1.6.2 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
 - Compatibility with moto 2.2.20
