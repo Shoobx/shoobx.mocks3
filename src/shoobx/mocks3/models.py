@@ -10,6 +10,7 @@ import codecs
 import collections
 import datetime
 import hashlib
+from importlib import reload
 import json
 import os
 import shutil
@@ -636,6 +637,13 @@ class ShoobxS3Backend(models.S3Backend):
     def __init__(self):
         self.directory = './data'
         super().__init__()
+
+    @property
+    def _url_module(self):
+        import shoobx.mocks3.urls as backend_urls_module
+
+        reload(backend_urls_module)
+        return backend_urls_module
 
     def create_bucket(self, bucket_name, region_name):
         new_bucket = Bucket(self, bucket_name)

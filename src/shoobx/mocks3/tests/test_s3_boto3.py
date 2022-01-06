@@ -70,8 +70,12 @@ class BotoTestCase(unittest.TestCase):
         shutil.rmtree(self._dir)
         self.mock_aws.stop()
 
-    def store_key(self, name, body, bucket='mybucket'):
-        self.s3.put_object(Bucket=bucket, Key=name, Body=body)
+    def store_key(
+        self, name, body, bucket='mybucket', storageClass="STANDARD"
+    ):
+        self.s3.put_object(
+            Bucket=bucket, Key=name, Body=body, StorageClass=storageClass
+        )
 
     def retrieve_key(self, name, bucket='mybucket'):
         return self.s3.get_object(Bucket=bucket, Key=name)['Body']
@@ -602,7 +606,7 @@ class BotoTestCase(unittest.TestCase):
 
     @freeze_time("2012-01-01 12:00:00")
     def test_restore_key(self):
-        self.store_key("the-key", "some value")
+        self.store_key("the-key", "some value", storageClass="GLACIER")
         self.assertIsNone(self.bucket.Object("the-key").restore)
 
         self.bucket.Object("the-key").restore_object(RestoreRequest={'Days': 1})
