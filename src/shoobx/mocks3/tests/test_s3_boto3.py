@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ###############################################################################
 #
 # Copyright 2016 by Shoobx, Inc.
@@ -6,23 +5,23 @@
 ###############################################################################
 """Shoobx S3 Backend
 """
-from __future__ import unicode_literals
 
-import boto3
 import functools
-import mock
+import json
 import shutil
 import tempfile
 import unittest
+from unittest import mock
+
+import boto3
 import botocore
 import requests
-import json
 from botocore.client import ClientError, Config
+from freezegun import freeze_time
 from moto.core.models import MockAWS
+from moto.s3.models import ALL_USERS_GRANTEE
 from six.moves.urllib.error import HTTPError
 from six.moves.urllib.request import urlopen
-from freezegun import freeze_time
-from moto.s3.models import ALL_USERS_GRANTEE
 
 from shoobx.mocks3 import models
 
@@ -33,16 +32,16 @@ def reduced_min_part_size(f):
     """ speed up tests by temporarily making the multipart minimum part size
         small
     """
-    import moto.s3.models as s3model
-    orig_size = s3model.UPLOAD_PART_MIN_SIZE
+    from moto import settings as msettings
+    orig_size = msettings.S3_UPLOAD_PART_MIN_SIZE
 
     @functools.wraps(f)
     def wrapped(self, *args, **kwargs):
         try:
-            s3model.UPLOAD_PART_MIN_SIZE = REDUCED_PART_SIZE
+            msettings.S3_UPLOAD_PART_MIN_SIZE = REDUCED_PART_SIZE
             return f(self, *args, **kwargs)
         finally:
-            s3model.UPLOAD_PART_MIN_SIZE = orig_size
+            msettings.S3_UPLOAD_PART_MIN_SIZE = orig_size  # noqa
     return wrapped
 
 class BotoTestCase(unittest.TestCase):
@@ -70,8 +69,12 @@ class BotoTestCase(unittest.TestCase):
         shutil.rmtree(self._dir)
         self.mock_aws.stop()
 
-    def store_key(self, name, body, bucket='mybucket'):
-        self.s3.put_object(Bucket=bucket, Key=name, Body=body)
+    def store_key(
+        self, name, body, bucket='mybucket', storageClass="STANDARD"
+    ):
+        self.s3.put_object(
+            Bucket=bucket, Key=name, Body=body, StorageClass=storageClass
+        )
 
     def retrieve_key(self, name, bucket='mybucket'):
         return self.s3.get_object(Bucket=bucket, Key=name)['Body']
@@ -95,67 +98,67 @@ class BotoTestCase(unittest.TestCase):
 #        self.assertEqual(key_name, resp['Contents'][0]['Key'])
 
     def test_boto3_bucket_create(self):
-        self.s3 = boto3.resource(
+        s3 = boto3.resource(
             's3', region_name='us-east-1',
             config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(Bucket="blah")
+        s3.create_bucket(Bucket="blah")
 
-        self.s3.Object('blah', 'hello.txt').put(Body="some text")
+        s3.Object('blah', 'hello.txt').put(Body="some text")
 
-        body = self.s3.Object('blah', 'hello.txt').get()['Body']
+        body = s3.Object('blah', 'hello.txt').get()['Body']
         self.assertEqual("some text", body.read().decode("utf-8"))
 
     def test_boto3_bucket_create_eu_central(self):
-        self.s3 = boto3.resource('s3', region_name='eu-central-1',
+        s3 = boto3.resource('s3', region_name='eu-central-1',
             config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(
+        s3.create_bucket(
             Bucket="blah",
             CreateBucketConfiguration={
                 'LocationConstraint': 'eu-central-1'
             }
         )
 
-        self.s3.Object('blah', 'hello.txt').put(Body="some text")
+        s3.Object('blah', 'hello.txt').put(Body="some text")
 
-        body = self.s3.Object('blah', 'hello.txt').get()['Body']
+        body = s3.Object('blah', 'hello.txt').get()['Body']
         self.assertEqual("some text", body.read().decode("utf-8"))
 
     def test_boto3_head_object(self):
-        self.s3 = boto3.resource('s3', region_name='us-east-1',
+        s3 = boto3.resource('s3', region_name='us-east-1',
             config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(Bucket="blah")
+        s3.create_bucket(Bucket="blah")
 
-        self.s3.Object('blah', 'hello.txt').put(Body="some text")
+        s3.Object('blah', 'hello.txt').put(Body="some text")
 
-        self.s3.Object('blah', 'hello.txt').meta.client.head_object(
+        s3.Object('blah', 'hello.txt').meta.client.head_object(
             Bucket='blah', Key='hello.txt')
 
         with self.assertRaises(ClientError):
-            self.s3.Object('blah', 'hello2.txt').meta.client.head_object(
+            s3.Object('blah', 'hello2.txt').meta.client.head_object(
                 Bucket='blah', Key='hello_bad.txt')
 
     def test_boto3_get_object(self):
-        self.s3 = boto3.resource('s3', region_name='us-east-1',
+        s3 = boto3.resource('s3', region_name='us-east-1',
             config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(Bucket="blah")
+        s3.create_bucket(Bucket="blah")
 
-        self.s3.Object('blah', 'hello.txt').put(Body="some text")
+        s3.Object('blah', 'hello.txt').put(Body="some text")
 
-        self.s3.Object('blah', 'hello.txt').meta.client.head_object(
+        s3.Object('blah', 'hello.txt').meta.client.head_object(
             Bucket='blah', Key='hello.txt')
 
         with self.assertRaises(ClientError) as err:
-            self.s3.Object('blah', 'hello2.txt').get()
+            s3.Object('blah', 'hello2.txt').get()
 
         self.assertEqual('NoSuchKey', err.exception.response['Error']['Code'])
 
     def test_boto3_head_object_with_versioning(self):
-        self.s3 = boto3.resource('s3', region_name='us-east-1',
+        s3 = boto3.resource('s3', region_name='us-east-1',
             config=Config(s3={'addressing_style': 'path'}))
-        bucket = self.s3.create_bucket(Bucket="mybucket")
+        bucket = self.bucket
         bucket.Versioning().enable()
 
-        obj = self.s3.Object('mybucket', 'hello.txt')
+        obj = s3.Object('mybucket', 'hello.txt')
         old_content = 'some text'
         new_content = 'some new text'
         obj.put(Body=old_content)
@@ -262,11 +265,6 @@ class BotoTestCase(unittest.TestCase):
 
     @reduced_min_part_size
     def test_boto3_multipart_etag(self):
-        # Create Bucket so that test can run
-        self.s3 = boto3.client('s3', region_name='us-east-1',
-            config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(Bucket='mybucket')
-
         upload_id = self.s3.create_multipart_upload(
             Bucket='mybucket', Key='the-key')['UploadId']
         part1 = b'0' * REDUCED_PART_SIZE
@@ -325,7 +323,7 @@ class BotoTestCase(unittest.TestCase):
         self.assertEqual(2, len(uploads))
         self.assertEqual(
             {'one-key': uid1, 'two-key': uid2},
-            dict([(u.object_key, u.id) for u in uploads]))
+            {u.object_key: u.id for u in uploads})
         for u in uploads:
             if u.object_key == 'two-key':
                 u.abort()
@@ -415,7 +413,6 @@ class BotoTestCase(unittest.TestCase):
             '2012-01-01 12:00:00+00:00',
             str(self.bucket.Object("the-key").last_modified))
 
-
     def test_create_existing_bucket_in_us_east_1(self):
         """Trying to create a bucket that already exists in us-east-1 returns
         the bucket
@@ -455,7 +452,6 @@ class BotoTestCase(unittest.TestCase):
             self.bucket.delete()
 
     def test_list_buckets(self):
-
         # TBD: MockAWS doesn't return timestamps so list_bucket_fails
         def parse_ts(ts):
             ts = ts if ts else "2012-01-01 12:00:00"
@@ -519,8 +515,8 @@ class BotoTestCase(unittest.TestCase):
             Bucket="mybucket",
             Delete={'Objects': [{'Key': 'abc'}, {'Key': 'file3'}]})
 
-        self.assertEqual(1, len(rsp['Deleted']))
-        self.assertEqual(1, len(rsp['Errors']))
+        # Moto no longer errors when there is an invalid key
+        self.assertEqual(2, len(rsp['Deleted']), "Incorrect deletion length")
         osummary = list(self.bucket.objects.all())
         self.assertEqual(3, len(osummary))
         self.assertEqual('file1', osummary[0].key)
@@ -579,13 +575,13 @@ class BotoTestCase(unittest.TestCase):
 
         rsp = self.s3.list_objects(Bucket='mybucket', Prefix=prefix + 'x')
         self.assertEqual(
-            [u'toplevel/x/key', u'toplevel/x/y/key', u'toplevel/x/y/z/key'],
+            ['toplevel/x/key', 'toplevel/x/y/key', 'toplevel/x/y/z/key'],
             [x['Key'] for x in rsp['Contents']])
 
         rsp = self.s3.list_objects(
             Bucket='mybucket', Prefix=prefix + 'x', Delimiter='/')
         self.assertEqual(
-            [u'toplevel/x/'],
+            ['toplevel/x/'],
             [x['Prefix'] for x in rsp['CommonPrefixes']])
 
     def test_key_with_reduced_redundancy(self):
@@ -609,7 +605,7 @@ class BotoTestCase(unittest.TestCase):
 
     @freeze_time("2012-01-01 12:00:00")
     def test_restore_key(self):
-        self.store_key("the-key", "some value")
+        self.store_key("the-key", "some value", storageClass="GLACIER")
         self.assertIsNone(self.bucket.Object("the-key").restore)
 
         self.bucket.Object("the-key").restore_object(RestoreRequest={'Days': 1})
@@ -645,7 +641,7 @@ class BotoTestCase(unittest.TestCase):
         self.assertEqual(2, len(rsp['Versions']))
         self.assertEqual(
             [('0', 'the-key'), ('1', 'the-key')],
-            sorted([(v['VersionId'], v['Key']) for v in rsp['Versions']]))
+            sorted((v['VersionId'], v['Key']) for v in rsp['Versions']))
         rsp = self.bucket.Object('the-key').get(VersionId='0')
         self.assertEqual(b'Version 1', rsp['Body'].read())
         rsp = self.bucket.Object('the-key').get(VersionId='1')
@@ -693,16 +689,16 @@ class BotoTestCase(unittest.TestCase):
             g['Permission'] == 'READ' for g in grants))
 
     def test_unicode_key(self):
-        self.store_key(u'こんにちは.jpg', 'Hello world!')
+        self.store_key('こんにちは.jpg', 'Hello world!')
         osummary = list(self.bucket.objects.all())
-        self.assertEqual(u'こんにちは.jpg', osummary[0].key)
-        body = self.retrieve_key(u'こんにちは.jpg')
+        self.assertEqual('こんにちは.jpg', osummary[0].key)
+        body = self.retrieve_key('こんにちは.jpg')
         self.assertEqual(b'Hello world!', body.read())
 
     def test_unicode_value(self):
-        self.store_key('some_key', u'こんにちは.jpg')
+        self.store_key('some_key', 'こんにちは.jpg')
         body = self.retrieve_key('some_key')
-        self.assertEqual(u'こんにちは.jpg', body.read().decode("utf-8"))
+        self.assertEqual('こんにちは.jpg', body.read().decode("utf-8"))
 
     def test_setting_content_encoding(self):
         obj = self.bucket.Object("keyname")

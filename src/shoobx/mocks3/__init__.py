@@ -6,13 +6,17 @@
 """Shoobx Mock S3
 """
 from pkg_resources import get_distribution
+
 __version__ = get_distribution('shoobx.mocks3').version
 
+import importlib
+
+import moto.backends
 # Insert our custom backend into moto.
 from moto.backends import BACKENDS
-import moto.backends
-import importlib
+
 from .models import s3_sbx_backend
+
 
 def _import_backend(module_name, backends_name):
     if module_name.startswith("shoobx."):

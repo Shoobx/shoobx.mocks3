@@ -5,8 +5,10 @@
 ###############################################################################
 """S3 Responses
 """
-from shoobx.mocks3 import models
 from moto.s3 import responses
+
+from shoobx.mocks3 import models
+
 
 class ResponseObject(responses.ResponseObject):
 

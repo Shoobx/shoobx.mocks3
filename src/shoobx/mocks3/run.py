@@ -8,9 +8,11 @@
 import argparse
 import os
 import sys
+
 import werkzeug.serving
 
 from shoobx.mocks3 import config
+
 
 class ShoobxRequestHandler(werkzeug.serving.WSGIRequestHandler):
 
@@ -27,7 +29,7 @@ class ShoobxRequestHandler(werkzeug.serving.WSGIRequestHandler):
         # Allow logging errors even before the environ attribute gets set.
         environ = getattr(self, 'environ', {})
         werkzeug.serving._log(
-            type, '%s - %s [%s] %s\n' % (
+            type, '{} - {} [{}] {}\n'.format(
                 self.address_string(),
                 environ.get('shoobx.user', '-'),
                 self.log_date_time_string(),

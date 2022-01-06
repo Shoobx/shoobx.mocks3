@@ -6,7 +6,9 @@
 """WSGI Entry Point
 """
 import os
+
 from shoobx.mocks3 import config
+
 
 def get_wsgi_app():
     config_file = os.environ.get(
