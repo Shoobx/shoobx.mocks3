@@ -5,8 +5,8 @@ coverage == 5.5
 freezegun == 1.0.0
 junit-xml == 1.9
 mock == 4.0.3
-moto == 2.1.0
-botocore == 1.20.112
-boto3 == 1.17.112
+moto == 2.2.9
+botocore == 1.21.65
+boto3 == 1.18.65
 python-subunit == 1.4.0
 zope.testrunner == 5.3.0

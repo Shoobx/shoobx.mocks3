@@ -95,67 +95,67 @@ class BotoTestCase(unittest.TestCase):
 #        self.assertEqual(key_name, resp['Contents'][0]['Key'])
 
     def test_boto3_bucket_create(self):
-        self.s3 = boto3.resource(
+        s3 = boto3.resource(
             's3', region_name='us-east-1',
             config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(Bucket="blah")
+        s3.create_bucket(Bucket="blah")
 
-        self.s3.Object('blah', 'hello.txt').put(Body="some text")
+        s3.Object('blah', 'hello.txt').put(Body="some text")
 
-        body = self.s3.Object('blah', 'hello.txt').get()['Body']
+        body = s3.Object('blah', 'hello.txt').get()['Body']
         self.assertEqual("some text", body.read().decode("utf-8"))
 
     def test_boto3_bucket_create_eu_central(self):
-        self.s3 = boto3.resource('s3', region_name='eu-central-1',
+        s3 = boto3.resource('s3', region_name='eu-central-1',
             config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(
+        s3.create_bucket(
             Bucket="blah",
             CreateBucketConfiguration={
                 'LocationConstraint': 'eu-central-1'
             }
         )
 
-        self.s3.Object('blah', 'hello.txt').put(Body="some text")
+        s3.Object('blah', 'hello.txt').put(Body="some text")
 
-        body = self.s3.Object('blah', 'hello.txt').get()['Body']
+        body = s3.Object('blah', 'hello.txt').get()['Body']
         self.assertEqual("some text", body.read().decode("utf-8"))
 
     def test_boto3_head_object(self):
-        self.s3 = boto3.resource('s3', region_name='us-east-1',
+        s3 = boto3.resource('s3', region_name='us-east-1',
             config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(Bucket="blah")
+        s3.create_bucket(Bucket="blah")
 
-        self.s3.Object('blah', 'hello.txt').put(Body="some text")
+        s3.Object('blah', 'hello.txt').put(Body="some text")
 
-        self.s3.Object('blah', 'hello.txt').meta.client.head_object(
+        s3.Object('blah', 'hello.txt').meta.client.head_object(
             Bucket='blah', Key='hello.txt')
 
         with self.assertRaises(ClientError):
-            self.s3.Object('blah', 'hello2.txt').meta.client.head_object(
+            s3.Object('blah', 'hello2.txt').meta.client.head_object(
                 Bucket='blah', Key='hello_bad.txt')
 
     def test_boto3_get_object(self):
-        self.s3 = boto3.resource('s3', region_name='us-east-1',
+        s3 = boto3.resource('s3', region_name='us-east-1',
             config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(Bucket="blah")
+        s3.create_bucket(Bucket="blah")
 
-        self.s3.Object('blah', 'hello.txt').put(Body="some text")
+        s3.Object('blah', 'hello.txt').put(Body="some text")
 
-        self.s3.Object('blah', 'hello.txt').meta.client.head_object(
+        s3.Object('blah', 'hello.txt').meta.client.head_object(
             Bucket='blah', Key='hello.txt')
 
         with self.assertRaises(ClientError) as err:
-            self.s3.Object('blah', 'hello2.txt').get()
+            s3.Object('blah', 'hello2.txt').get()
 
         self.assertEqual('NoSuchKey', err.exception.response['Error']['Code'])
 
     def test_boto3_head_object_with_versioning(self):
-        self.s3 = boto3.resource('s3', region_name='us-east-1',
+        s3 = boto3.resource('s3', region_name='us-east-1',
             config=Config(s3={'addressing_style': 'path'}))
-        bucket = self.s3.create_bucket(Bucket="mybucket")
+        bucket = self.bucket
         bucket.Versioning().enable()
 
-        obj = self.s3.Object('mybucket', 'hello.txt')
+        obj = s3.Object('mybucket', 'hello.txt')
         old_content = 'some text'
         new_content = 'some new text'
         obj.put(Body=old_content)
@@ -262,11 +262,6 @@ class BotoTestCase(unittest.TestCase):
 
     @reduced_min_part_size
     def test_boto3_multipart_etag(self):
-        # Create Bucket so that test can run
-        self.s3 = boto3.client('s3', region_name='us-east-1',
-            config=Config(s3={'addressing_style': 'path'}))
-        self.s3.create_bucket(Bucket='mybucket')
-
         upload_id = self.s3.create_multipart_upload(
             Bucket='mybucket', Key='the-key')['UploadId']
         part1 = b'0' * REDUCED_PART_SIZE
@@ -415,7 +410,6 @@ class BotoTestCase(unittest.TestCase):
             '2012-01-01 12:00:00+00:00',
             str(self.bucket.Object("the-key").last_modified))
 
-
     def test_create_existing_bucket_in_us_east_1(self):
         """Trying to create a bucket that already exists in us-east-1 returns
         the bucket
@@ -455,7 +449,6 @@ class BotoTestCase(unittest.TestCase):
             self.bucket.delete()
 
     def test_list_buckets(self):
-
         # TBD: MockAWS doesn't return timestamps so list_bucket_fails
         def parse_ts(ts):
             ts = ts if ts else "2012-01-01 12:00:00"

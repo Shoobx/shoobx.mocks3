@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Copyright 2016 by Shoobx, Inc.
+# Copyright 2016-2022 by Shoobx, Inc.
 #
 ###############################################################################
 """Shoobx S3 Backend
@@ -23,11 +23,14 @@ from moto.core.utils import iso_8601_datetime_with_milliseconds
 from moto.core.utils import iso_8601_datetime_without_milliseconds_s3
 from moto.core.utils import rfc_1123_datetime
 
+
 def _encode_name(name):
     return name.replace('/', '__sl__')
 
+
 def _decode_name(name):
     return name.replace('__sl__', '/')
+
 
 class _InfoProperty(object):
 
@@ -72,10 +75,13 @@ class _AclProperty(_InfoProperty):
         else:
             info[self.name] = [
                 {'grantees': [
-                    {'id': grantee.id,
-                     'uri': grantee.uri,
-                     'display_name': grantee.display_name}
-                     for grantee in grant.grantees],
+                    {
+                        'id': grantee.id,
+                        'uri': grantee.uri,
+                        'display_name': grantee.display_name
+                    }
+                    for grantee in grant.grantees
+                 ],
                  'permissions': grant.permissions}
                 for grant in value.grants]
         with open(inst._info_path, 'w') as file:
@@ -91,17 +97,21 @@ class Key(models.FakeKey):
     expiry_date = _InfoProperty('expiry_date')
     acl = _AclProperty('acl')
 
-    def __init__(self,
-                 bucket,
-                 name,
-                 version=0,
-                 is_versioned=False,
-                 multipart=None,
-                 bucket_name=None,
-                 encryption=None,
-                 kms_key_id=None,
-                 bucket_key_enabled=None
-                 ):
+    def __init__(
+        self,
+        bucket,
+        name,
+        version=0,
+        is_versioned=False,
+        multipart=None,
+        bucket_name=None,
+        encryption=None,
+        kms_key_id=None,
+        bucket_key_enabled=None,
+        lock_mode=None,
+        lock_legal_status="OFF",
+        lock_until=None,
+    ):
         self.bucket = bucket
         self.name = name
         self.version = version
@@ -115,6 +125,9 @@ class Key(models.FakeKey):
         self.encryption = encryption
         self.kms_key_id = kms_key_id
         self.bucket_key_enabled = bucket_key_enabled
+        self.lock_mode = lock_mode
+        self.lock_legal_status = lock_legal_status
+        self.lock_until = lock_until
 
     @property
     def _version_id(self):
@@ -240,10 +253,10 @@ class Key(models.FakeKey):
         key_dir = os.path.join(bucket._path, 'keys', _encode_name(name))
         if not os.path.exists(key_dir):
             return []
-        return sorted((
+        return sorted([
             Key(bucket, name, int(version))
             for version in os.listdir(key_dir)
-            ), key=lambda k: k.version)
+            ], key=lambda k: k.version)
 
 
 class VersionedKeyStore(collections.MutableMapping):
@@ -355,7 +368,7 @@ class Part(object):
         shutil.rmtree(self._path)
 
 
-class Multipart(object):
+class Multipart:
 
     key_name = _InfoProperty('key_name')
     metadata = _InfoProperty('metadata')
@@ -365,10 +378,11 @@ class Multipart(object):
         if id is None:
             rand_b64 = base64.b64encode(os.urandom(models.UPLOAD_ID_BYTES))
             self.id = rand_b64.decode('utf-8')\
-              .replace('=', '').replace('+', '').replace('/', '')
+                .replace('=', '').replace('+', '').replace('/', '')
 
         self._path = os.path.join(bucket._path, 'multiparts', self.id)
         self._info_path = os.path.join(self._path, 'info.json')
+        self.storage = None
 
     def exists(self):
         return os.path.exists(self._path)
@@ -433,9 +447,9 @@ class Multipart(object):
         parts = sorted((
             fn[:-5] for fn in os.listdir(self._path)
             if fn.endswith('.part')),
-            key = lambda v: int(v))
+            key=lambda v: int(v))
         for part in parts:
-                yield self.get_part(part)
+            yield self.get_part(part)
 
 
 class Multiparts(collections.MutableMapping):
@@ -470,7 +484,7 @@ class Multiparts(collections.MutableMapping):
         return len(os.listdir(self._path))
 
 
-class Bucket(object):
+class Bucket:
 
     policy = _InfoProperty('policy')
     versioning_status = _InfoProperty('versioning_status')
@@ -479,6 +493,19 @@ class Bucket(object):
     def __init__(self, s3, name):
         self.s3 = s3
         self.name = name
+        self.region_name = None
+
+        self.cors = []
+        self.logging = {}
+        self.notification_configuration = None
+        self.accelerate_configuration = None
+        self.payer = "BucketOwner"
+        self.public_access_block = None
+        self.encryption = None
+        self.object_lock_enabled = False
+        self.default_lock_mode = ""
+        self.default_lock_days = 0
+        self.default_lock_years = 0
 
         self._path = os.path.join(s3.directory, self.name + '.bucket')
         self._info_path = os.path.join(self._path, 'info.json')
@@ -551,6 +578,7 @@ class Bucket(object):
 
     def create(self, region_name=None):
         os.mkdir(self._path)
+        self.region_name = region_name
         with open(self._info_path, 'w') as file:
             json.dump({
                 'region_name': region_name
@@ -571,7 +599,8 @@ class Bucket(object):
     def delete_lifecycle(self):
         os.remove(self._lifecyle_path)
 
-    def set_website_configuration(self, website_configuration):
+    @website_configuration.setter
+    def website_configuration(self, website_configuration):
         if isinstance(website_configuration, bytes):
             website_configuration = website_configuration.decode('utf-8')
         if website_configuration is None:
@@ -605,7 +634,7 @@ class ShoobxS3Backend(models.S3Backend):
             raise models.BucketAlreadyExists(bucket=bucket_name)
         new_bucket.create(region_name)
 
-    def get_all_buckets(self):
+    def list_buckets(self):
         return [
             Bucket(self, fn[:-7])
             for fn in os.listdir(self.directory)
@@ -621,17 +650,21 @@ class ShoobxS3Backend(models.S3Backend):
         bucket = Bucket(self, bucket_name)
         return bucket.delete()
 
-    def set_object(self,
-                   bucket_name,
-                   key_name,
-                   value,
-                   storage=None,
-                   etag=None,
-                   multipart=None,
-                   encryption=None,
-                   kms_key_id=None,
-                   bucket_key_enabled=None,
-                   ):
+    def put_object(
+        self,
+        bucket_name,
+        key_name,
+        value,
+        storage=None,
+        etag=None,
+        multipart=None,
+        encryption=None,
+        kms_key_id=None,
+        bucket_key_enabled=None,
+        lock_mode=None,
+        lock_legal_status="OFF",
+        lock_until=None,
+    ):
         key_name = models.clean_key_name(key_name)
 
         bucket = self.get_bucket(bucket_name)
@@ -651,6 +684,9 @@ class ShoobxS3Backend(models.S3Backend):
             encryption=encryption,
             kms_key_id=kms_key_id,
             bucket_key_enabled=bucket_key_enabled,
+            lock_mode=lock_mode,
+            lock_legal_status=lock_legal_status,
+            lock_until=lock_until,
         )
         new_key.create(
             value=value,
@@ -672,8 +708,7 @@ class ShoobxS3Backend(models.S3Backend):
         value, etag = multipart.complete(body)
         if value is None:
             return
-
-        key = self.set_object(
+        key = self.put_object(
             bucket_name, multipart.key_name, value, etag=etag,
             multipart=multipart
         )
@@ -682,6 +717,22 @@ class ShoobxS3Backend(models.S3Backend):
         del bucket.multiparts[multipart_id]
 
         return key
+
+    def create_multipart_upload(
+        self, bucket_name, key_name, metadata, storage_type
+    ):
+        bucket = self.get_bucket(bucket_name)
+        new_multipart = Multipart(bucket, key_name)
+        new_multipart.create(key_name, metadata)
+        new_multipart.storage = storage_type
+        bucket.multiparts[new_multipart.id] = new_multipart
+        return new_multipart.id
+
+    def complete_multipart_upload(self, bucket_name, multipart_id, body):
+        bucket = self.get_bucket(bucket_name)
+        multipart = bucket.multiparts[multipart_id]
+        value, etag = multipart.complete(body)
+        return multipart, value, etag
 
 
 s3_sbx_backend = ShoobxS3Backend()
