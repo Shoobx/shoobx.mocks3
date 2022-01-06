@@ -19,7 +19,7 @@ import requests.structures
 from moto import settings
 from moto.cloudformation.exceptions import UnformattedGetAttTemplateException
 from moto.s3 import models
-from moto.core.utils import iso_8601_datetime_with_milliseconds
+from moto.core.utils import iso_8601_datetime_with_milliseconds, unix_time_millis
 from moto.core.utils import iso_8601_datetime_without_milliseconds_s3
 from moto.core.utils import rfc_1123_datetime
 
@@ -128,6 +128,13 @@ class Key(models.FakeKey):
         self.lock_mode = lock_mode
         self.lock_legal_status = lock_legal_status
         self.lock_until = lock_until
+
+
+    def __getstate__(self):
+        return self.__dict__.copy()
+
+    def __setstate__(self, state):
+        self.__dict__.update({k: v for k, v in state.items() if k != "value"})
 
     @property
     def _version_id(self):
