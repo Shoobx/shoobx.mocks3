@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ###############################################################################
 #
 # Copyright 2018 by Shoobx, Inc.
@@ -6,7 +5,6 @@
 ###############################################################################
 """Shoobx S3 Config Test
 """
-from __future__ import unicode_literals
 
 import os
 import shutil

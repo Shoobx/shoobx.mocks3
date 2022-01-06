@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ###############################################################################
 #
 # Copyright 2016 by Shoobx, Inc.
@@ -6,11 +5,10 @@
 ###############################################################################
 """Shoobx S3 Backend
 """
-from __future__ import unicode_literals
 
 import boto3
 import functools
-import mock
+from unittest import mock
 import shutil
 import tempfile
 import unittest
@@ -324,7 +322,7 @@ class BotoTestCase(unittest.TestCase):
         self.assertEqual(2, len(uploads))
         self.assertEqual(
             {'one-key': uid1, 'two-key': uid2},
-            dict([(u.object_key, u.id) for u in uploads]))
+            {u.object_key: u.id for u in uploads})
         for u in uploads:
             if u.object_key == 'two-key':
                 u.abort()
@@ -576,13 +574,13 @@ class BotoTestCase(unittest.TestCase):
 
         rsp = self.s3.list_objects(Bucket='mybucket', Prefix=prefix + 'x')
         self.assertEqual(
-            [u'toplevel/x/key', u'toplevel/x/y/key', u'toplevel/x/y/z/key'],
+            ['toplevel/x/key', 'toplevel/x/y/key', 'toplevel/x/y/z/key'],
             [x['Key'] for x in rsp['Contents']])
 
         rsp = self.s3.list_objects(
             Bucket='mybucket', Prefix=prefix + 'x', Delimiter='/')
         self.assertEqual(
-            [u'toplevel/x/'],
+            ['toplevel/x/'],
             [x['Prefix'] for x in rsp['CommonPrefixes']])
 
     def test_key_with_reduced_redundancy(self):
@@ -642,7 +640,7 @@ class BotoTestCase(unittest.TestCase):
         self.assertEqual(2, len(rsp['Versions']))
         self.assertEqual(
             [('0', 'the-key'), ('1', 'the-key')],
-            sorted([(v['VersionId'], v['Key']) for v in rsp['Versions']]))
+            sorted((v['VersionId'], v['Key']) for v in rsp['Versions']))
         rsp = self.bucket.Object('the-key').get(VersionId='0')
         self.assertEqual(b'Version 1', rsp['Body'].read())
         rsp = self.bucket.Object('the-key').get(VersionId='1')
@@ -690,16 +688,16 @@ class BotoTestCase(unittest.TestCase):
             g['Permission'] == 'READ' for g in grants))
 
     def test_unicode_key(self):
-        self.store_key(u'こんにちは.jpg', 'Hello world!')
+        self.store_key('こんにちは.jpg', 'Hello world!')
         osummary = list(self.bucket.objects.all())
-        self.assertEqual(u'こんにちは.jpg', osummary[0].key)
-        body = self.retrieve_key(u'こんにちは.jpg')
+        self.assertEqual('こんにちは.jpg', osummary[0].key)
+        body = self.retrieve_key('こんにちは.jpg')
         self.assertEqual(b'Hello world!', body.read())
 
     def test_unicode_value(self):
-        self.store_key('some_key', u'こんにちは.jpg')
+        self.store_key('some_key', 'こんにちは.jpg')
         body = self.retrieve_key('some_key')
-        self.assertEqual(u'こんにちは.jpg', body.read().decode("utf-8"))
+        self.assertEqual('こんにちは.jpg', body.read().decode("utf-8"))
 
     def test_setting_content_encoding(self):
         obj = self.bucket.Object("keyname")
