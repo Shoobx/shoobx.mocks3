@@ -76,7 +76,7 @@ class _AclProperty(_InfoProperty):
             info[self.name] = [
                 {'grantees': [
                     {
-                        'id': grantee.id,
+                        'grantee_id': grantee.id,
                         'uri': grantee.uri,
                         'display_name': grantee.display_name
                     }
@@ -562,7 +562,7 @@ class Bucket:
             exp = rule.get('Expiration')
             tran = rule.get('Transition')
             rules.append(models.LifecycleRule(
-                id=rule.get('ID'),
+                rule_id=rule.get('ID'),
                 prefix=rule['Prefix'],
                 status=rule['Status'],
                 expiration_days=exp.get('Days') if exp else None,
