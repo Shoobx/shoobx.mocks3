@@ -20,7 +20,7 @@ help:
 
 .PHONY: clean
 clean:
-	rm -rf ve/ pip-selfcheck.json
+	rm -rf ve/ pip-selfcheck.json .tox/
 
 .PHONY: real-clean
 real-clean:
