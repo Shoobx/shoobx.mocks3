@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-3.0.0 (unreleased)
+3.0.0 (2022-01-21)
 ------------------
 
 - Compatibility with moto 3.0.0
