@@ -2,10 +2,12 @@
 CHANGELOG
 =========
 
-2.0.1 (unreleased)
+2.1.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Compatibility with moto 3.2.0
+
+- Fix tox config, dropping Py2.7 and PyPy, adding Py3.10.
 
 
 2.0.0 (2022-01-06)
