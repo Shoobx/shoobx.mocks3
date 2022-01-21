@@ -36,5 +36,5 @@ url_paths = {
 
     # path-based bucket + key
     '{0}/(?P<bucket_name_path>[^/]+)/(?P<key_name>.+)':
-        S3ResponseInstance.key_or_control_response,
+        S3ResponseInstance.key_response,
 }

@@ -53,7 +53,7 @@ setup(
     ],
     install_requires=[
         'boto3',
-        'moto[server]',
+        'moto[server]>=3.0.0',
         'flask_cors',
     ],
     extras_require=dict(
