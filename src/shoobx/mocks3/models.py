@@ -7,7 +7,7 @@
 """
 import base64
 import codecs
-import collections
+import collections.abc
 import datetime
 import hashlib
 import json
@@ -265,7 +265,7 @@ class Key(models.FakeKey):
             ), key=lambda k: k.version)
 
 
-class VersionedKeyStore(collections.MutableMapping):
+class VersionedKeyStore(collections.abc.MutableMapping):
 
     def __init__(self, bucket):
         self.bucket = bucket
@@ -460,7 +460,7 @@ class Multipart:
             yield self.get_part(part)
 
 
-class Multiparts(collections.MutableMapping):
+class Multiparts(collections.abc.MutableMapping):
 
     def __init__(self, bucket):
         self.bucket = bucket
