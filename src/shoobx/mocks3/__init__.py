@@ -31,5 +31,3 @@ moto.backends._import_backend = _import_backend
 
 s3_backends = {"global": s3_sbx_backend}
 BACKENDS['s3-sbx'] = ('shoobx.mocks3', 's3_backends')
-
-mock_s3_sbx = s3_sbx_backend.decorator
