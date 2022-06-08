@@ -631,9 +631,11 @@ class Bucket:
 
 class ShoobxS3Backend(models.S3Backend):
 
-    def __init__(self):
+    def __init__(self, region_name='us-east-42', account_id='deadbeef00d'):
+        self.region_name = region_name
+        self.account_id = account_id
         self.directory = './data'
-        super().__init__()
+        super().__init__(self.region_name, self.account_id)
 
     @property
     def _url_module(self):
