@@ -128,6 +128,7 @@ class Key(models.FakeKey):
         self.lock_mode = lock_mode
         self.lock_legal_status = lock_legal_status
         self.lock_until = lock_until
+        self._tick = 0
 
     def __getstate__(self):
         return self.__dict__.copy()

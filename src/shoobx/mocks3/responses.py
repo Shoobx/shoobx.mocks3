@@ -10,7 +10,11 @@ from moto.s3 import responses
 from shoobx.mocks3 import models
 
 
-class ResponseObject(responses.ResponseObject):
+class S3Response(responses.S3Response):
+
+    @property
+    def backend(self):
+        return models.s3_sbx_backend
 
     def subdomain_based_buckets(self, request):
         return False
@@ -19,4 +23,4 @@ class ResponseObject(responses.ResponseObject):
         return 200, headers, self.backend.directory
 
 
-S3ResponseInstance = ResponseObject(models.s3_sbx_backend)
+S3ResponseInstance = S3Response()

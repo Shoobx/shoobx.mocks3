@@ -2,10 +2,11 @@
 CHANGELOG
 =========
 
+
 3.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Compatibility with moto 3.1.14
 
 
 3.1.1 (2022-06-08)
