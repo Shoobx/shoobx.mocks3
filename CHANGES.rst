@@ -6,7 +6,8 @@ CHANGELOG
 3.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Compatibility with moto 3.1.16
+- Properly fix s3 backends/responses
 
 
 3.1.2 (2022-06-23)

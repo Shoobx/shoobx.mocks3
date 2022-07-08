@@ -7,15 +7,16 @@
 """
 from pkg_resources import get_distribution
 
-__version__ = get_distribution('shoobx.mocks3').version
+__version__ = get_distribution("shoobx.mocks3").version
 
 import importlib
 
 import moto.backends
+
 # Insert our custom backend into moto.
 from moto.backends import BACKENDS
 
-from .models import s3_sbx_backend
+from .models import s3_backends  # noqa
 
 
 def _import_backend(module_name, backends_name):
@@ -25,9 +26,9 @@ def _import_backend(module_name, backends_name):
         module = importlib.import_module("moto." + module_name)
     return getattr(module, backends_name)
 
+
 # Monkey patch _import_backend to escape "moto." pkg prefixing
 # for shoobx backends
 moto.backends._import_backend = _import_backend
 
-s3_backends = {"global": s3_sbx_backend}
-BACKENDS['s3-sbx'] = ('shoobx.mocks3', 's3_backends')
+BACKENDS["s3-sbx"] = ("shoobx.mocks3", "s3_backends")

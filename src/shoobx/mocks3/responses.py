@@ -7,14 +7,14 @@
 """
 from moto.s3 import responses
 
-from shoobx.mocks3 import models
+from .models import s3_backends
 
 
 class S3Response(responses.S3Response):
 
     @property
     def backend(self):
-        return models.s3_sbx_backend
+        return s3_backends["global"]
 
     def subdomain_based_buckets(self, request):
         return False
