@@ -44,14 +44,15 @@ def reduced_min_part_size(f):
             msettings.S3_UPLOAD_PART_MIN_SIZE = orig_size  # noqa
     return wrapped
 
+
 class BotoTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.mock_aws = MockAWS({'global': models.s3_sbx_backend})
+        self.mock_aws = MockAWS(models.s3_backends)
         self.mock_aws.start()
         self._dir = tempfile.mkdtemp()
         self.data_dir_patch = mock.patch(
-            'shoobx.mocks3.models.s3_sbx_backend.directory',
+            'shoobx.mocks3.models.ShoobxS3Backend.directory',
             self._dir)
         self.data_dir_patch.start()
         self.s3 = boto3.client(

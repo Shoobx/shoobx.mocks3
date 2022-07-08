@@ -20,7 +20,8 @@ from moto import settings
 from moto.cloudformation.exceptions import UnformattedGetAttTemplateException
 from moto.core.utils import (iso_8601_datetime_with_milliseconds,
                              iso_8601_datetime_without_milliseconds_s3,
-                             rfc_1123_datetime)
+                             rfc_1123_datetime,
+                             BackendDict)
 from moto.s3 import models
 
 
@@ -160,7 +161,11 @@ class Key(models.FakeKey):
     def etag(self):
         if self._etag is None:
             with open(self._value_path, 'rb') as file:
-                self._etag = hashlib.md5(file.read()).hexdigest()
+                # The file might be *very* large. Don't try to do it all at once.
+                file_hash = hashlib.md5()
+                while chunk := file.read(8192):
+                    file_hash.update(chunk)
+                self._etag = file_hash.hexdigest()
         return f'"{self._etag}"'
 
     @property
@@ -380,6 +385,7 @@ class Multipart:
     key_name = _InfoProperty('key_name')
     metadata = _InfoProperty('metadata')
     tags = _InfoProperty('tags')
+    acl = _InfoProperty('acl')
 
     def __init__(self, bucket, id=None):
         self.id = id
@@ -639,6 +645,14 @@ class ShoobxS3Backend(models.S3Backend):
         super().__init__(self.region_name, self.account_id)
 
     @property
+    def directory(self):
+        return self._directory
+
+    @directory.setter
+    def directory(self, dir):
+        self._directory = dir
+
+    @property
     def _url_module(self):
         # Prevent a circular import
         import shoobx.mocks3.urls as backend_urls_module
@@ -737,7 +751,7 @@ class ShoobxS3Backend(models.S3Backend):
         return key
 
     def create_multipart_upload(
-        self, bucket_name, key_name, metadata, storage_type, tags
+        self, bucket_name, key_name, metadata, storage_type, tags, acl,
     ):
         bucket = self.get_bucket(bucket_name)
         new_multipart = Multipart(bucket, key_name)
@@ -753,4 +767,6 @@ class ShoobxS3Backend(models.S3Backend):
         return multipart, value, etag
 
 
-s3_sbx_backend = ShoobxS3Backend()
+s3_backends = BackendDict(
+    ShoobxS3Backend, service_name="s3", use_boto3_regions=False, additional_regions=["global"]
+)
