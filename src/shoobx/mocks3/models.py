@@ -170,9 +170,7 @@ class Key(models.FakeKey):
 
     @property
     def size(self):
-        with open(self._value_path, "rb") as file:
-            file.seek(0, 2)
-            return file.tell()
+        return os.path.getsize(self._value_path)
 
     @property
     def last_modified(self):
