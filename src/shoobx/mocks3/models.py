@@ -443,7 +443,6 @@ class Multipart:
             part_etag = part.etag.replace('"', '')
             md5s.extend(decode_hex(part_etag)[0])
             total += part.value
-            # total.extend(part.value)
             last = part
             count += 1
 
