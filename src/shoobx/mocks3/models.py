@@ -169,6 +169,12 @@ class Key(models.FakeKey):
         return f'"{self._etag}"'
 
     @property
+    def size(self):
+        with open(self._value_path, "rb") as file:
+            file.seek(0, 2)
+            return file.tell()
+
+    @property
     def last_modified(self):
         return datetime.datetime.strptime(
             self._last_modified, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -188,7 +194,7 @@ class Key(models.FakeKey):
         r = {
             'etag': self.etag,
             'last-modified': self.last_modified_RFC1123,
-            'content-length': str(len(self.value)),
+            'content-length': str(self.size),
             }
         if self.storage_class is not None:
             r['x-amz-storage-class'] = self.storage_class
@@ -436,7 +442,8 @@ class Multipart:
                 raise models.EntityTooSmall()
             part_etag = part.etag.replace('"', '')
             md5s.extend(decode_hex(part_etag)[0])
-            total.extend(part.value)
+            total += part.value
+            # total.extend(part.value)
             last = part
             count += 1
 
