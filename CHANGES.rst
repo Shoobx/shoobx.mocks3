@@ -6,7 +6,7 @@ CHANGELOG
 3.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Pin Werkzeug to 2.1.2 as >=2.2.0 doesn't work with moto.
 
 
 3.1.3 (2022-07-08)

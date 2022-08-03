@@ -7,5 +7,6 @@ junit-xml == 1.9
 mock == 4.0.3
 moto == 3.1.16
 python-subunit == 1.4.0
+Werkzeug == 2.1.2
 tox == 3.24.5
 zope.testrunner == 5.3.0
