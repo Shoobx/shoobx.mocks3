@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-3.1.4 (unreleased)
+3.1.4 (2022-08-03)
 ------------------
 
 - Pin Werkzeug to 2.1.2 as >=2.2.0 doesn't work with moto.
