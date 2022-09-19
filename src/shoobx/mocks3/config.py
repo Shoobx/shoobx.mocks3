@@ -63,7 +63,7 @@ def configure(config_file):
         filename=filename, level=config.get('shoobx:mocks3', 'log-level'))
 
     directory = config.get('shoobx:mocks3', 'directory')
-    models.s3_backends["global"].directory = directory
+    models.s3_backends["12345678910"]["global"].directory = directory
     if not os.path.exists(directory):
         os.makedirs(directory)
 

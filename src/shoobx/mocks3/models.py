@@ -382,10 +382,8 @@ class Part:
 
 class Multipart:
 
-    key_name = _InfoProperty('key_name')
-    metadata = _InfoProperty('metadata')
-    tags = _InfoProperty('tags')
-    acl = _InfoProperty('acl')
+    sse_encryption = _InfoProperty("sse_encryption")
+    kms_key_id = _InfoProperty("kms_key_id")
 
     def __init__(self, bucket, id=None):
         self.id = id
@@ -751,7 +749,15 @@ class ShoobxS3Backend(models.S3Backend):
         return key
 
     def create_multipart_upload(
-        self, bucket_name, key_name, metadata, storage_type, tags, acl,
+        self,
+        bucket_name,
+        key_name,
+        metadata,
+        storage_type,
+        tags,
+        acl,
+        sse_encryption,
+        kms_key_id,
     ):
         bucket = self.get_bucket(bucket_name)
         new_multipart = Multipart(bucket, key_name)

@@ -14,7 +14,7 @@ class S3Response(responses.S3Response):
 
     @property
     def backend(self):
-        return s3_backends["global"]
+        return s3_backends["12345678910"]["global"]
 
     def subdomain_based_buckets(self, request):
         return False
