@@ -35,6 +35,10 @@ def _decode_name(name):
     return name.replace("__sl__", "/")
 
 
+# See http://docs.getmoto.org/en/latest/docs/multi_account.html
+MOTO_DEFAULT_ACCOUNT_ID = "12345678910"
+
+
 class _InfoProperty:
     def __init__(self, name):
         self.name = name

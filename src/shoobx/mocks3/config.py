@@ -63,7 +63,7 @@ def configure(config_file):
     )
 
     directory = config.get("shoobx:mocks3", "directory")
-    models.s3_backends["12345678910"]["global"].directory = directory
+    models.s3_backends[models.MOTO_DEFAULT_ACCOUNT_ID]["global"].directory = directory
     if not os.path.exists(directory):
         os.makedirs(directory)
 
