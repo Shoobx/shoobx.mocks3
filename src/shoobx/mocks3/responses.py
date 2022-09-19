@@ -11,7 +11,6 @@ from .models import s3_backends
 
 
 class S3Response(responses.S3Response):
-
     @property
     def backend(self):
         return s3_backends["12345678910"]["global"]

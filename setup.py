@@ -5,8 +5,11 @@
 ###############################################################################
 """Shoobx Mock S3 Setup
 """
-import os, glob
-from setuptools import setup, find_packages
+import glob
+import os
+
+from setuptools import find_packages, setup
+
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
