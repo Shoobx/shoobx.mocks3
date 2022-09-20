@@ -3,10 +3,10 @@ CHANGELOG
 =========
 
 
-3.1.5 (unreleased)
+4.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+-  Upgrade to moto4.
 
 
 3.1.4 (2022-08-03)

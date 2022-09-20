@@ -18,23 +18,28 @@ import pytz
 import requests.structures
 from moto import settings
 from moto.cloudformation.exceptions import UnformattedGetAttTemplateException
-from moto.core.utils import (iso_8601_datetime_with_milliseconds,
-                             iso_8601_datetime_without_milliseconds_s3,
-                             rfc_1123_datetime,
-                             BackendDict)
+from moto.core.utils import (
+    BackendDict,
+    iso_8601_datetime_with_milliseconds,
+    iso_8601_datetime_without_milliseconds_s3,
+    rfc_1123_datetime,
+)
 from moto.s3 import models
 
 
 def _encode_name(name):
-    return name.replace('/', '__sl__')
+    return name.replace("/", "__sl__")
 
 
 def _decode_name(name):
-    return name.replace('__sl__', '/')
+    return name.replace("__sl__", "/")
+
+
+# See http://docs.getmoto.org/en/latest/docs/multi_account.html
+MOTO_DEFAULT_ACCOUNT_ID = "12345678910"
 
 
 class _InfoProperty:
-
     def __init__(self, name):
         self.name = name
 
@@ -46,27 +51,28 @@ class _InfoProperty:
 
     def __set__(self, inst, value):
         if isinstance(value, bytes):
-            value = value.decode('utf-8')
+            value = value.decode("utf-8")
         with open(inst._info_path) as file:
             info = json.load(file)
         info[self.name] = value
-        with open(inst._info_path, 'w') as file:
+        with open(inst._info_path, "w") as file:
             json.dump(info, file)
 
 
 class _AclProperty(_InfoProperty):
-
     def __get__(self, inst, cls):
         raw_data = super().__get__(inst, cls)
         if raw_data is None:
-            return models.get_canned_acl('private')
-        return models.FakeAcl([
-            models.FakeGrant(
-                [models.FakeGrantee(**grantee)
-                 for grantee in grant['grantees']],
-                grant['permissions'])
-            for grant in raw_data
-        ])
+            return models.get_canned_acl("private")
+        return models.FakeAcl(
+            [
+                models.FakeGrant(
+                    [models.FakeGrantee(**grantee) for grantee in grant["grantees"]],
+                    grant["permissions"],
+                )
+                for grant in raw_data
+            ]
+        )
 
     def __set__(self, inst, value):
         with open(inst._info_path) as file:
@@ -75,28 +81,31 @@ class _AclProperty(_InfoProperty):
             info[self.name] = None
         else:
             info[self.name] = [
-                {'grantees': [
-                    {
-                        'grantee_id': grantee.id,
-                        'uri': grantee.uri,
-                        'display_name': grantee.display_name
-                    }
-                    for grantee in grant.grantees
-                 ],
-                 'permissions': grant.permissions}
-                for grant in value.grants]
-        with open(inst._info_path, 'w') as file:
+                {
+                    "grantees": [
+                        {
+                            "grantee_id": grantee.id,
+                            "uri": grantee.uri,
+                            "display_name": grantee.display_name,
+                        }
+                        for grantee in grant.grantees
+                    ],
+                    "permissions": grant.permissions,
+                }
+                for grant in value.grants
+            ]
+        with open(inst._info_path, "w") as file:
             json.dump(info, file)
 
 
 class Key(models.FakeKey):
 
-    _last_modified = _InfoProperty('last_modified')
-    storage_class = _InfoProperty('storage_class')
-    metadata = _InfoProperty('metadata')
-    _etag = _InfoProperty('etag')
-    expiry_date = _InfoProperty('expiry_date')
-    acl = _AclProperty('acl')
+    _last_modified = _InfoProperty("last_modified")
+    storage_class = _InfoProperty("storage_class")
+    metadata = _InfoProperty("metadata")
+    _etag = _InfoProperty("etag")
+    expiry_date = _InfoProperty("expiry_date")
+    acl = _AclProperty("acl")
 
     def __init__(
         self,
@@ -118,10 +127,10 @@ class Key(models.FakeKey):
         self.version = version
         self._is_versioned = is_versioned
         self.multipart = multipart
-        self._path = os.path.join(bucket._path, 'keys', _encode_name(name))
+        self._path = os.path.join(bucket._path, "keys", _encode_name(name))
         self._versioned_path = os.path.join(self._path, str(version))
-        self._info_path = os.path.join(self._versioned_path, 'info.json')
-        self._value_path = os.path.join(self._versioned_path, 'value')
+        self._info_path = os.path.join(self._versioned_path, "info.json")
+        self._value_path = os.path.join(self._versioned_path, "value")
         self.bucket_name = bucket_name
         self.encryption = encryption
         self.kms_key_id = kms_key_id
@@ -147,20 +156,20 @@ class Key(models.FakeKey):
 
     @property
     def value(self):
-        with open(self._value_path, 'rb') as file:
+        with open(self._value_path, "rb") as file:
             return file.read()
 
     @value.setter
     def value(self, data):
         if not isinstance(data, (bytes, bytearray)):
-            data = data.encode('utf-8')
-        with open(self._value_path, 'wb') as file:
+            data = data.encode("utf-8")
+        with open(self._value_path, "wb") as file:
             file.write(data)
 
     @property
     def etag(self):
         if self._etag is None:
-            with open(self._value_path, 'rb') as file:
+            with open(self._value_path, "rb") as file:
                 # The file might be *very* large. Don't try to do it all at once.
                 file_hash = hashlib.md5()
                 while chunk := file.read(8192):
@@ -170,8 +179,7 @@ class Key(models.FakeKey):
 
     @property
     def last_modified(self):
-        return datetime.datetime.strptime(
-            self._last_modified, "%Y-%m-%dT%H:%M:%S.%fZ")
+        return datetime.datetime.strptime(self._last_modified, "%Y-%m-%dT%H:%M:%S.%fZ")
 
     @property
     def last_modified_ISO8601(self):
@@ -186,18 +194,18 @@ class Key(models.FakeKey):
     @property
     def response_dict(self):
         r = {
-            'etag': self.etag,
-            'last-modified': self.last_modified_RFC1123,
-            'content-length': str(len(self.value)),
-            }
+            "etag": self.etag,
+            "last-modified": self.last_modified_RFC1123,
+            "content-length": str(len(self.value)),
+        }
         if self.storage_class is not None:
-            r['x-amz-storage-class'] = self.storage_class
+            r["x-amz-storage-class"] = self.storage_class
         if self.expiry_date is not None:
             rhdr = 'ongoing-request="false", expiry-date="{0}"'
-            r['x-amz-restore'] = rhdr.format(self.expiry_date)
+            r["x-amz-restore"] = rhdr.format(self.expiry_date)
 
         if self.bucket.is_versioned:
-            r['x-amz-version-id'] = str(self.version)
+            r["x-amz-version-id"] = str(self.version)
 
         return r
 
@@ -212,27 +220,32 @@ class Key(models.FakeKey):
         if not os.path.exists(self._versioned_path):
             os.makedirs(self._versioned_path)
         self.value = value
-        with open(self._info_path, 'w') as file:
-            json.dump({
-                'last_modified': iso_8601_datetime_without_milliseconds_s3(
-                    datetime.datetime.utcnow()),
-                'storage_class': storage,
-                'metadata': {},
-                'expiry_date': None,
-                'etag': etag
-            }, file)
-        self.set_acl(models.get_canned_acl('private'))
+        with open(self._info_path, "w") as file:
+            json.dump(
+                {
+                    "last_modified": iso_8601_datetime_without_milliseconds_s3(
+                        datetime.datetime.utcnow()
+                    ),
+                    "storage_class": storage,
+                    "metadata": {},
+                    "expiry_date": None,
+                    "etag": etag,
+                },
+                file,
+            )
+        self.set_acl(models.get_canned_acl("private"))
 
     def delete(self):
         shutil.rmtree(self._path)
 
     def copy(self, new_name=None, new_is_versioned=None):
-        new_path = os.path.join(self.bucket._path, 'keys', new_name)
+        new_path = os.path.join(self.bucket._path, "keys", new_name)
         os.mkdir(new_path)
         new_versioned_path = os.path.join(new_path, str(self.version))
         shutil.copytree(self._versioned_path, new_versioned_path)
-        return Key(self.bucket, new_name, version=self.version,
-                   is_versioned=new_is_versioned)
+        return Key(
+            self.bucket, new_name, version=self.version, is_versioned=new_is_versioned
+        )
 
     def set_metadata(self, metadata, replace=False):
         md = self.metadata if not replace else {}
@@ -248,7 +261,7 @@ class Key(models.FakeKey):
     def append_to_value(self, value):
         if self.bucket.is_versioned:
             old_path = self._versioned_path
-            self.__init__(self.bucket, self.name, self.version+1)
+            self.__init__(self.bucket, self.name, self.version + 1)
             os.rename(old_path, self._versioned_path)
             self.create(value)
 
@@ -262,20 +275,19 @@ class Key(models.FakeKey):
 
     @classmethod
     def get_versions(cls, bucket, name):
-        key_dir = os.path.join(bucket._path, 'keys', _encode_name(name))
+        key_dir = os.path.join(bucket._path, "keys", _encode_name(name))
         if not os.path.exists(key_dir):
             return []
-        return sorted((
-            Key(bucket, name, int(version))
-            for version in os.listdir(key_dir)
-            ), key=lambda k: k.version)
+        return sorted(
+            (Key(bucket, name, int(version)) for version in os.listdir(key_dir)),
+            key=lambda k: k.version,
+        )
 
 
 class VersionedKeyStore(collections.abc.MutableMapping):
-
     def __init__(self, bucket):
         self.bucket = bucket
-        self._path = os.path.join(bucket._path, 'keys')
+        self._path = os.path.join(bucket._path, "keys")
 
     def __getitem__(self, name):
         versions = Key.get_versions(self.bucket, name)
@@ -315,27 +327,27 @@ class VersionedKeyStore(collections.abc.MutableMapping):
 
 class Part:
 
-    _last_modified = _InfoProperty('last_modified')
-    etag = _InfoProperty('etag')
+    _last_modified = _InfoProperty("last_modified")
+    etag = _InfoProperty("etag")
 
     def __init__(self, multipart, name):
         self.multipart = multipart
         self.name = name
-        self._path = os.path.join(multipart._path, str(name)+'.part')
-        self._info_path = os.path.join(self._path, 'info.json')
-        self._value_path = os.path.join(self._path, 'value')
+        self._path = os.path.join(multipart._path, str(name) + ".part")
+        self._info_path = os.path.join(self._path, "info.json")
+        self._value_path = os.path.join(self._path, "value")
 
     def exists(self):
         return os.path.exists(self._path)
 
     @property
     def value(self):
-        with open(self._value_path, 'rb') as file:
+        with open(self._value_path, "rb") as file:
             return file.read()
 
     @value.setter
     def value(self, data):
-        with open(self._value_path, 'wb') as file:
+        with open(self._value_path, "wb") as file:
             file.write(data)
         self.etag = f'"{hashlib.md5(data).hexdigest()}"'
 
@@ -345,8 +357,7 @@ class Part:
 
     @property
     def last_modified(self):
-        return datetime.datetime.strptime(
-            self._last_modified, "%Y-%m-%dT%H:%M:%S.%fZ")
+        return datetime.datetime.strptime(self._last_modified, "%Y-%m-%dT%H:%M:%S.%fZ")
 
     @property
     def last_modified_ISO8601(self):
@@ -361,19 +372,23 @@ class Part:
     @property
     def response_dict(self):
         return {
-            'etag': self.etag,
-            'last-modified': self.last_modified_RFC1123,
+            "etag": self.etag,
+            "last-modified": self.last_modified_RFC1123,
         }
 
     def create(self, value):
         if not os.path.exists(self._path):
             os.makedirs(self._path)
-        with open(self._info_path, 'w') as file:
-            json.dump({
-                'last_modified': iso_8601_datetime_with_milliseconds(
-                    datetime.datetime.utcnow()),
-                'etag': None
-            }, file)
+        with open(self._info_path, "w") as file:
+            json.dump(
+                {
+                    "last_modified": iso_8601_datetime_with_milliseconds(
+                        datetime.datetime.utcnow()
+                    ),
+                    "etag": None,
+                },
+                file,
+            )
         self.value = value
 
     def delete(self):
@@ -382,20 +397,26 @@ class Part:
 
 class Multipart:
 
-    key_name = _InfoProperty('key_name')
-    metadata = _InfoProperty('metadata')
-    tags = _InfoProperty('tags')
-    acl = _InfoProperty('acl')
+    key_name = _InfoProperty("key_name")
+    metadata = _InfoProperty("metadata")
+    tags = _InfoProperty("tags")
+    acl = _InfoProperty("acl")
+    sse_encryption = _InfoProperty("sse_encryption")
+    kms_key_id = _InfoProperty("kms_key_id")
 
     def __init__(self, bucket, id=None):
         self.id = id
         if id is None:
             rand_b64 = base64.b64encode(os.urandom(models.UPLOAD_ID_BYTES))
-            self.id = rand_b64.decode('utf-8')\
-                .replace('=', '').replace('+', '').replace('/', '')
+            self.id = (
+                rand_b64.decode("utf-8")
+                .replace("=", "")
+                .replace("+", "")
+                .replace("/", "")
+            )
 
-        self._path = os.path.join(bucket._path, 'multiparts', self.id)
-        self._info_path = os.path.join(self._path, 'info.json')
+        self._path = os.path.join(bucket._path, "multiparts", self.id)
+        self._info_path = os.path.join(self._path, "info.json")
         self.storage = None
 
     def exists(self):
@@ -404,15 +425,11 @@ class Multipart:
     def create(self, key_name, metadata, tags):
         if not os.path.exists(self._path):
             os.makedirs(self._path)
-        with open(self._info_path, 'w') as file:
+        with open(self._info_path, "w") as file:
             # Make metadata json serialization friendly
             if isinstance(metadata, requests.structures.CaseInsensitiveDict):
                 metadata = dict(metadata)
-            json.dump({
-                'key_name': key_name,
-                'metadata': metadata,
-                'tags': tags
-            }, file)
+            json.dump({"key_name": key_name, "metadata": metadata, "tags": tags}, file)
 
     def delete(self):
         if not os.path.exists(self._path):
@@ -431,10 +448,9 @@ class Multipart:
             part = self.get_part(pn)
             if part is None or part.etag != etag:
                 raise models.InvalidPart()
-            if last is not None and \
-                    len(last.value) < settings.S3_UPLOAD_PART_MIN_SIZE:
+            if last is not None and len(last.value) < settings.S3_UPLOAD_PART_MIN_SIZE:
                 raise models.EntityTooSmall()
-            part_etag = part.etag.replace('"', '')
+            part_etag = part.etag.replace('"', "")
             md5s.extend(decode_hex(part_etag)[0])
             total.extend(part.value)
             last = part
@@ -459,19 +475,18 @@ class Multipart:
         return part
 
     def list_parts(self):
-        parts = sorted((
-            fn[:-5] for fn in os.listdir(self._path)
-            if fn.endswith('.part')),
-            key=lambda v: int(v))
+        parts = sorted(
+            (fn[:-5] for fn in os.listdir(self._path) if fn.endswith(".part")),
+            key=lambda v: int(v),
+        )
         for part in parts:
             yield self.get_part(part)
 
 
 class Multiparts(collections.abc.MutableMapping):
-
     def __init__(self, bucket):
         self.bucket = bucket
-        self._path = os.path.join(bucket._path, 'multiparts')
+        self._path = os.path.join(bucket._path, "multiparts")
 
     def __getitem__(self, name):
         mp = Multipart(self.bucket, name)
@@ -500,9 +515,9 @@ class Multiparts(collections.abc.MutableMapping):
 
 class Bucket:
 
-    policy = _InfoProperty('policy')
-    versioning_status = _InfoProperty('versioning_status')
-    acl = _AclProperty('acl')
+    policy = _InfoProperty("policy")
+    versioning_status = _InfoProperty("versioning_status")
+    acl = _AclProperty("acl")
 
     def __init__(self, s3, name):
         self.s3 = s3
@@ -521,21 +536,20 @@ class Bucket:
         self.default_lock_days = 0
         self.default_lock_years = 0
 
-        self._path = os.path.join(s3.directory, self.name + '.bucket')
-        self._info_path = os.path.join(self._path, 'info.json')
-        self._lifecyle_path = os.path.join(self._path, 'lifecycle.json')
-        self._ws_config_path = os.path.join(
-            self._path, 'website_configuration.xml')
+        self._path = os.path.join(s3.directory, self.name + ".bucket")
+        self._info_path = os.path.join(self._path, "info.json")
+        self._lifecyle_path = os.path.join(self._path, "lifecycle.json")
+        self._ws_config_path = os.path.join(self._path, "website_configuration.xml")
         self.creation_date = datetime.datetime.now(tz=pytz.utc)
 
     @property
     def info(self):
-        with open(self._info_path, 'rb') as file:
+        with open(self._info_path, "rb") as file:
             return json.load(file)
 
     @info.setter
     def info(self, value):
-        with open(self._info_path, 'wb') as file:
+        with open(self._info_path, "wb") as file:
             return json.dump(value, file)
 
     @property
@@ -548,11 +562,11 @@ class Bucket:
 
     @property
     def location(self):
-        return self.info.get('region_name')
+        return self.info.get("region_name")
 
     @property
     def is_versioned(self):
-        return self.versioning_status == 'Enabled'
+        return self.versioning_status == "Enabled"
 
     @property
     def physical_resource_id(self):
@@ -566,18 +580,20 @@ class Bucket:
         with open(self._lifecyle_path) as file:
             raw_rules = json.load(file)
         for rule in raw_rules:
-            exp = rule.get('Expiration')
-            tran = rule.get('Transition')
-            rules.append(models.LifecycleRule(
-                rule_id=rule.get('ID'),
-                prefix=rule['Prefix'],
-                status=rule['Status'],
-                expiration_days=exp.get('Days') if exp else None,
-                expiration_date=exp.get('Date') if exp else None,
-                transition_days=tran.get('Days') if tran else None,
-                transition_date=tran.get('Date') if tran else None,
-                storage_class=tran['StorageClass'] if tran else None,
-            ))
+            exp = rule.get("Expiration")
+            tran = rule.get("Transition")
+            rules.append(
+                models.LifecycleRule(
+                    rule_id=rule.get("ID"),
+                    prefix=rule["Prefix"],
+                    status=rule["Status"],
+                    expiration_days=exp.get("Days") if exp else None,
+                    expiration_date=exp.get("Date") if exp else None,
+                    transition_days=tran.get("Days") if tran else None,
+                    transition_date=tran.get("Date") if tran else None,
+                    storage_class=tran["StorageClass"] if tran else None,
+                )
+            )
         return rules
 
     @property
@@ -593,10 +609,8 @@ class Bucket:
     def create(self, region_name=None):
         os.mkdir(self._path)
         self.region_name = region_name
-        with open(self._info_path, 'w') as file:
-            json.dump({
-                'region_name': region_name
-                }, file)
+        with open(self._info_path, "w") as file:
+            json.dump({"region_name": region_name}, file)
 
     def delete(self):
         if not os.path.exists(self._path):
@@ -607,7 +621,7 @@ class Bucket:
         return True
 
     def set_lifecycle(self, rules):
-        with open(self._lifecyle_path, 'w') as file:
+        with open(self._lifecyle_path, "w") as file:
             json.dump(rules, file)
 
     def delete_lifecycle(self):
@@ -616,20 +630,18 @@ class Bucket:
     @website_configuration.setter
     def website_configuration(self, website_configuration):
         if isinstance(website_configuration, bytes):
-            website_configuration = website_configuration.decode('utf-8')
+            website_configuration = website_configuration.decode("utf-8")
         if website_configuration is None:
             os.remove(self._ws_config_path)
             return
-        with open(self._ws_config_path, 'w') as file:
+        with open(self._ws_config_path, "w") as file:
             return file.write(website_configuration)
 
     def get_cfn_attribute(self, attribute_name):
-        if attribute_name == 'DomainName':
-            raise NotImplementedError(
-                '"Fn::GetAtt" : [ "{0}" , "DomainName" ]"')
-        elif attribute_name == 'WebsiteURL':
-            raise NotImplementedError(
-                '"Fn::GetAtt" : [ "{0}" , "WebsiteURL" ]"')
+        if attribute_name == "DomainName":
+            raise NotImplementedError('"Fn::GetAtt" : [ "{0}" , "DomainName" ]"')
+        elif attribute_name == "WebsiteURL":
+            raise NotImplementedError('"Fn::GetAtt" : [ "{0}" , "WebsiteURL" ]"')
         raise UnformattedGetAttTemplateException()
 
     def set_acl(self, acl):
@@ -637,11 +649,10 @@ class Bucket:
 
 
 class ShoobxS3Backend(models.S3Backend):
-
-    def __init__(self, region_name='us-east-42', account_id='deadbeef00d'):
+    def __init__(self, region_name="us-east-42", account_id="deadbeef00d"):
         self.region_name = region_name
         self.account_id = account_id
-        self.directory = './data'
+        self.directory = "./data"
         super().__init__(self.region_name, self.account_id)
 
     @property
@@ -670,7 +681,8 @@ class ShoobxS3Backend(models.S3Backend):
         return [
             Bucket(self, fn[:-7])
             for fn in os.listdir(self.directory)
-            if fn.endswith('.bucket')]
+            if fn.endswith(".bucket")
+        ]
 
     def get_bucket(self, bucket_name):
         bucket = Bucket(self, bucket_name)
@@ -720,10 +732,7 @@ class ShoobxS3Backend(models.S3Backend):
             lock_legal_status=lock_legal_status,
             lock_until=lock_until,
         )
-        new_key.create(
-            value=value,
-            storage=storage,
-            etag=etag)
+        new_key.create(value=value, storage=storage, etag=etag)
 
         return new_key
 
@@ -741,8 +750,7 @@ class ShoobxS3Backend(models.S3Backend):
         if value is None:
             return
         key = self.put_object(
-            bucket_name, multipart.key_name, value, etag=etag,
-            multipart=multipart
+            bucket_name, multipart.key_name, value, etag=etag, multipart=multipart
         )
         key.set_metadata(multipart.metadata)
 
@@ -751,7 +759,15 @@ class ShoobxS3Backend(models.S3Backend):
         return key
 
     def create_multipart_upload(
-        self, bucket_name, key_name, metadata, storage_type, tags, acl,
+        self,
+        bucket_name,
+        key_name,
+        metadata,
+        storage_type,
+        tags,
+        acl,
+        sse_encryption,
+        kms_key_id,
     ):
         bucket = self.get_bucket(bucket_name)
         new_multipart = Multipart(bucket, key_name)
@@ -768,5 +784,8 @@ class ShoobxS3Backend(models.S3Backend):
 
 
 s3_backends = BackendDict(
-    ShoobxS3Backend, service_name="s3", use_boto3_regions=False, additional_regions=["global"]
+    ShoobxS3Backend,
+    service_name="s3",
+    use_boto3_regions=False,
+    additional_regions=["global"],
 )

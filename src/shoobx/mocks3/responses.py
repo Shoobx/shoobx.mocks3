@@ -7,14 +7,13 @@
 """
 from moto.s3 import responses
 
-from .models import s3_backends
+from .models import MOTO_DEFAULT_ACCOUNT_ID, s3_backends
 
 
 class S3Response(responses.S3Response):
-
     @property
     def backend(self):
-        return s3_backends["global"]
+        return s3_backends[MOTO_DEFAULT_ACCOUNT_ID]["global"]
 
     def subdomain_based_buckets(self, request):
         return False
