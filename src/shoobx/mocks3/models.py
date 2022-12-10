@@ -18,8 +18,8 @@ import pytz
 import requests.structures
 from moto import settings
 from moto.cloudformation.exceptions import UnformattedGetAttTemplateException
+from moto.core import BackendDict
 from moto.core.utils import (
-    BackendDict,
     iso_8601_datetime_with_milliseconds,
     iso_8601_datetime_without_milliseconds_s3,
     rfc_1123_datetime,
@@ -139,6 +139,7 @@ class Key(models.FakeKey):
         self.lock_legal_status = lock_legal_status
         self.lock_until = lock_until
         self._tick = 0
+        self.disposed = None
 
     def __getstate__(self):
         return self.__dict__.copy()
@@ -781,6 +782,18 @@ class ShoobxS3Backend(models.S3Backend):
         multipart = bucket.multiparts[multipart_id]
         value, etag = multipart.complete(body)
         return multipart, value, etag
+
+    def reset(self):
+        # For every key and multipart, Moto opens a TemporaryFile to write the value of those keys
+        # Ensure that these TemporaryFile-objects are closed, and leave no filehandles open
+        for bucket in self.buckets.values():
+            for key in bucket.keys.values():
+                if isinstance(key, Key):
+                    key._value_buffer.close()
+                    if key.multipart is not None:
+                        for part in key.multipart.parts.values():
+                            part._value_buffer.close()
+        super().reset()
 
 
 s3_backends = BackendDict(

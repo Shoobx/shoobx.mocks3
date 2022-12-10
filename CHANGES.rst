@@ -6,7 +6,7 @@ CHANGELOG
 4.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Compatibility with moto 4.0.11
 
 
 4.0.0 (2022-09-20)
