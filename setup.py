@@ -26,7 +26,7 @@ setup(
     description="Shoobx Mock S3 Implementation",
     long_description=read('README.rst'),
     keywords="amazon aws s3 mock moto",
-    license='Proprietary',
+    license="ZPL 2.1",
     url="http://shoobx.com/",
     packages=find_packages('src'),
     package_dir={'': 'src'},

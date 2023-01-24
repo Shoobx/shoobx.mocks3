@@ -6,7 +6,7 @@ CHANGELOG
 4.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Released under ZPL2.1
 
 
 4.0.1 (2022-12-09)
