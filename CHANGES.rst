@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.0.2 (unreleased)
+4.1.0 (2023-01-24)
 ------------------
 
 - Released under ZPL2.1
