@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.1.1 (unreleased)
+4.1.1 (2023-01-24)
 ------------------
 
 - Fixed license classifier.
