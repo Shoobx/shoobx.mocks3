@@ -20,7 +20,7 @@ def read(fname):
 
 setup(
     name="shoobx.mocks3",
-    version='4.1.1',
+    version='4.1.2.dev0',
     author="Shoobx, Inc.",
     author_email="dev@shoobx.com",
     description="Shoobx Mock S3 Implementation",
