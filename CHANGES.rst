@@ -6,7 +6,11 @@ CHANGELOG
 4.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- werkzeug 2.2.3 works again
+- moto 4.1.1 works, but 4.1.2 not
+- Moving CI to github actions
+- Added python 3.11 testing and compatibility
+- Removed python 3.7 compatibility
 
 
 4.1.1 (2023-01-24)

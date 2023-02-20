@@ -1,0 +1,11 @@
+-e file:.[test]
+
+# moto[server] 4.1.2
+# breaks with
+# File "/work/shoobx/shoobx.mocks3/ve/lib/python3.10/site-packages/moto/s3/responses.py", line 1176, in _key_response
+#    bucket_permissions = bucket.get_permission(action, resource)
+# AttributeError: 'Bucket' object has no attribute 'get_permission'
+#
+# https://github.com/getmoto/moto/pull/5883#issuecomment-1437083301
+
+moto[server]==4.1.1
