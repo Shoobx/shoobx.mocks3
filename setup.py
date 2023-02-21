@@ -66,6 +66,7 @@ setup(
             'junitxml',
             'mock',
             'python-subunit',
+            'pytz',
             'zope.testrunner'],
         dev=['ipdb', 'pdbpp'],
     ),

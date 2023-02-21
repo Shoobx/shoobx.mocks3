@@ -6,6 +6,7 @@ CHANGELOG
 4.1.2 (unreleased)
 ------------------
 
+- Compatibility with moto 4.1.3
 - werkzeug 2.2.3 works again
 - moto 4.1.1 works, but 4.1.2 not
 - Moving CI to github actions
