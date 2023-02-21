@@ -17,7 +17,7 @@ CHANGELOG
 4.1.1 (2023-01-24)
 ------------------
 
-- Fixed license classifier.
+- Nothing changed yet.
 
 
 4.1.0 (2023-01-24)
