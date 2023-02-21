@@ -1,8 +1,8 @@
 Shoobx Mock S3 Server
 =====================
 
-.. image:: https://travis-ci.org/Shoobx/shoobx.mocks3.png?branch=master
-   :target: https://travis-ci.org/Shoobx/shoobx.mocks3
+.. image:: https://github.com/Shoobx/shoobx.mocks3/actions/workflows/test.yml/badge.svg
+   :target: https://github.com/Shoobx/shoobx.mocks3/actions
 
 .. image:: https://coveralls.io/repos/github/Shoobx/shoobx.mocks3/badge.svg?branch=master
    :target: https://coveralls.io/github/Shoobx/shoobx.mocks3?branch=master

@@ -5,7 +5,6 @@
 ###############################################################################
 """Shoobx Mock S3 Setup
 """
-import glob
 import os
 
 from setuptools import find_packages, setup
@@ -43,10 +42,10 @@ setup(
         'License :: OSI Approved :: Zope Public License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Natural Language :: English',
@@ -58,6 +57,7 @@ setup(
         'boto3',
         'moto[server]>=3.0.0',
         'flask_cors',
+        'pytz',
     ],
     extras_require=dict(
         test=[
@@ -65,7 +65,6 @@ setup(
             'freezegun',
             'junitxml',
             'mock',
-            "tox",
             'python-subunit',
             'pytz',
             'zope.testrunner'],

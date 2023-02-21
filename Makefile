@@ -45,7 +45,7 @@ all: ve ve/bin/test
 
 .PHONY: test
 test: ve/bin/test
-	ve/bin/test -vpc1 --all
+	ve/bin/test -vvc1 --all
 
 .PHONY: coverage
 coverage: ve
@@ -62,3 +62,8 @@ run: ve
 .PHONY: run-uwsgi
 run-uwsgi: ve
 	uwsgi ./config/uwsgi.ini --need-app
+
+.PHONY: pip-compile
+pip-compile: ve
+	ve/bin/pip install pip-tools
+	ve/bin/pip-compile ./requirements.in --upgrade
