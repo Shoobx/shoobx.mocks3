@@ -6,6 +6,7 @@ CHANGELOG
 4.1.2 (unreleased)
 ------------------
 
+- Revert licence changes
 - Compatibility with moto 4.1.3
 - werkzeug 2.2.3 works again
 - moto 4.1.1 works, but 4.1.2 not
@@ -17,13 +18,13 @@ CHANGELOG
 4.1.1 (2023-01-24)
 ------------------
 
-- Nothing changed yet.
+- Fixed license classifier.
 
 
 4.1.0 (2023-01-24)
 ------------------
 
-- Nothing changed yet.
+- Released under ZPL2.1
 
 
 4.0.1 (2022-12-09)
