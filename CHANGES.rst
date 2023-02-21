@@ -23,7 +23,7 @@ CHANGELOG
 4.1.0 (2023-01-24)
 ------------------
 
-- Released under ZPL2.1
+- Nothing changed yet.
 
 
 4.0.1 (2022-12-09)
