@@ -514,7 +514,7 @@ class Multiparts(collections.abc.MutableMapping):
         return len(os.listdir(self._path))
 
 
-class Bucket:
+class Bucket(models.FakeBucket):
 
     policy = _InfoProperty("policy")
     versioning_status = _InfoProperty("versioning_status")
@@ -564,14 +564,6 @@ class Bucket:
     @property
     def location(self):
         return self.info.get("region_name")
-
-    @property
-    def is_versioned(self):
-        return self.versioning_status == "Enabled"
-
-    @property
-    def physical_resource_id(self):
-        return self.name
 
     @property
     def rules(self):
@@ -644,9 +636,6 @@ class Bucket:
         elif attribute_name == "WebsiteURL":
             raise NotImplementedError('"Fn::GetAtt" : [ "{0}" , "WebsiteURL" ]"')
         raise UnformattedGetAttTemplateException()
-
-    def set_acl(self, acl):
-        self.acl = acl
 
 
 class ShoobxS3Backend(models.S3Backend):
