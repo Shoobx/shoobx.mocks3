@@ -67,6 +67,7 @@ setup(
             'mock',
             "tox",
             'python-subunit',
+            'pytz',
             'zope.testrunner'],
         dev=['ipdb', 'pdbpp'],
     ),
