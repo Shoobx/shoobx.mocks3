@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.1.2 (unreleased)
+4.2.0 (2023-02-21)
 ------------------
 
 - Revert licence changes
