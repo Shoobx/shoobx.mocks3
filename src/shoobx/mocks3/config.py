@@ -40,8 +40,10 @@ def load_config(config_path):
     if _CONFIG is not None:
         return _CONFIG
     # Environment variable expansion/interpolation a la supervisor.
+    # Convert all keys to upper case because config parser is case insensitive and
+    # would fail if the key only varies by capitalization.
     _CONFIG = configparser.ConfigParser(
-        defaults={"ENV_" + k: v for k, v in os.environ.items()}
+        defaults={"ENV_" + k.upper(): v for k, v in os.environ.items()}
     )
 
     # Load from config files. It will load from all files, with last one

@@ -6,7 +6,7 @@ CHANGELOG
 4.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix issue when environment variables would only differ by case.
 
 
 4.2.0 (2023-02-21)
