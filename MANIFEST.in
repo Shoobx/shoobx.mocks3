@@ -1,6 +1,7 @@
 include *.rst
 include *.md
 include .coveragerc
+include requirements.in
 include requirements.txt
 include setup.py
 include tox.ini
@@ -9,4 +10,6 @@ include Makefile
 recursive-include scripts *.py
 recursive-include src *
 recursive-include config *
+
+global-exclude .pre-commit-config.yaml
 global-exclude *.pyc

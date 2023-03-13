@@ -53,6 +53,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Office/Business',
     ],
+    python_requires=">=3.8",
     install_requires=[
         'boto3',
         'moto[server]>=3.0.0',
