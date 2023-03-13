@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.2.1 (unreleased)
+4.2.1 (2023-03-12)
 ------------------
 
 - Fix issue when environment variables would only differ by case.
