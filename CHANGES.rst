@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.2.2 (unreleased)
+4.2.2 (2023-03-21)
 ------------------
 
 - Add parameter to put_object.
