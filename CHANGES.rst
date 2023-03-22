@@ -6,7 +6,7 @@ CHANGELOG
 4.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add parameter to put_object.
 
 
 4.2.1 (2023-03-12)

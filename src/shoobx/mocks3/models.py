@@ -698,6 +698,7 @@ class ShoobxS3Backend(models.S3Backend):
         lock_mode=None,
         lock_legal_status="OFF",
         lock_until=None,
+        checksum_value=None,  # noqa
     ):
         key_name = models.clean_key_name(key_name)
 
