@@ -121,6 +121,7 @@ class Key(models.FakeKey):
         lock_mode=None,
         lock_legal_status="OFF",
         lock_until=None,
+        checksum_value=None,
     ):
         self.bucket = bucket
         self.name = name
@@ -140,6 +141,9 @@ class Key(models.FakeKey):
         self.lock_until = lock_until
         self._tick = 0
         self.disposed = None
+        self.checksum_value = checksum_value
+        self.checksum_algorithm = None
+
 
     def __getstate__(self):
         return self.__dict__.copy()
