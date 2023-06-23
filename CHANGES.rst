@@ -6,7 +6,7 @@ CHANGELOG
 4.2.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add checksum attributes to class Key
 
 
 4.2.2 (2023-03-21)
