@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.2.3 (unreleased)
+4.2.3 (2023-06-26)
 ------------------
 
 - Add checksum attributes to class Key
