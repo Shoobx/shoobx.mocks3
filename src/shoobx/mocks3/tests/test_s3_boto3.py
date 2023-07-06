@@ -906,5 +906,8 @@ class BotoTestCase(unittest.TestCase):
                 }
             ]
         }
-        self.bucket.LifecycleConfiguration().put(LifecycleConfiguration=cfg)
+
+        self.assertTrue(
+            self.bucket.LifecycleConfiguration().put(LifecycleConfiguration=cfg)
+        )
         self.assertEqual(cfg["Rules"], self.bucket.LifecycleConfiguration().rules)
