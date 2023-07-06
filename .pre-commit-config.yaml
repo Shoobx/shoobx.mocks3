@@ -18,7 +18,7 @@ repos:
         files: ^src/|^scripts/|^migrant/
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
+    rev: v3.8.0
     hooks:
       - id: pyupgrade
         args: ["--py39-plus"]
@@ -28,3 +28,8 @@ repos:
     hooks:
       - id: isort
         args: ["--profile", "black", "--line-length", "88", "--trailing-comma"]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8

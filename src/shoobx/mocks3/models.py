@@ -185,8 +185,8 @@ class Key(models.FakeKey):
 
     @checksum_value.setter
     def checksum_value(self, value):
+        # self.etag already generates an md5 hash if needed.
         self.etag
-        pass
 
     @property
     def last_modified(self):
