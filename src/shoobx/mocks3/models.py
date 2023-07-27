@@ -99,7 +99,6 @@ class _AclProperty(_InfoProperty):
 
 
 class Key(models.FakeKey):
-
     _last_modified = _InfoProperty("last_modified")
     storage_class = _InfoProperty("storage_class")
     metadata = _InfoProperty("metadata")
@@ -141,9 +140,7 @@ class Key(models.FakeKey):
         self.lock_until = lock_until
         self._tick = 0
         self.disposed = None
-        self.checksum_value = checksum_value
-        self.checksum_algorithm = None
-
+        self.checksum_algorithm = "md5"
 
     def __getstate__(self):
         return self.__dict__.copy()
@@ -181,6 +178,15 @@ class Key(models.FakeKey):
                     file_hash.update(chunk)
                 self._etag = file_hash.hexdigest()
         return f'"{self._etag}"'
+
+    @property
+    def checksum_value(self):
+        return self._etag
+
+    @checksum_value.setter
+    def checksum_value(self, value):
+        # self.etag already generates an md5 hash if needed.
+        self.etag
 
     @property
     def last_modified(self):
@@ -331,7 +337,6 @@ class VersionedKeyStore(collections.abc.MutableMapping):
 
 
 class Part:
-
     _last_modified = _InfoProperty("last_modified")
     etag = _InfoProperty("etag")
 
@@ -401,7 +406,6 @@ class Part:
 
 
 class Multipart:
-
     key_name = _InfoProperty("key_name")
     metadata = _InfoProperty("metadata")
     tags = _InfoProperty("tags")
@@ -519,7 +523,6 @@ class Multiparts(collections.abc.MutableMapping):
 
 
 class Bucket(models.FakeBucket):
-
     policy = _InfoProperty("policy")
     versioning_status = _InfoProperty("versioning_status")
     acl = _AclProperty("acl")
@@ -579,6 +582,15 @@ class Bucket(models.FakeBucket):
         for rule in raw_rules:
             exp = rule.get("Expiration")
             tran = rule.get("Transition")
+            tranisitions = []
+            if tran:
+                tranisitions.append(
+                    models.LifecycleTransition(
+                        date=tran.get("Date") or None,
+                        days=tran["Days"],
+                        storage_class=tran["StorageClass"],
+                    )
+                )
             rules.append(
                 models.LifecycleRule(
                     rule_id=rule.get("ID"),
@@ -586,9 +598,8 @@ class Bucket(models.FakeBucket):
                     status=rule["Status"],
                     expiration_days=exp.get("Days") if exp else None,
                     expiration_date=exp.get("Date") if exp else None,
-                    transition_days=tran.get("Days") if tran else None,
-                    transition_date=tran.get("Date") if tran else None,
-                    storage_class=tran["StorageClass"] if tran else None,
+                    transitions=tranisitions,
+                    noncurrent_version_transitions=[],
                 )
             )
         return rules
@@ -778,8 +789,9 @@ class ShoobxS3Backend(models.S3Backend):
         return multipart, value, etag
 
     def reset(self):
-        # For every key and multipart, Moto opens a TemporaryFile to write the value of those keys
-        # Ensure that these TemporaryFile-objects are closed, and leave no filehandles open
+        # For every key and multipart, Moto opens a TemporaryFile to write the value of
+        # those keys. Ensure that these TemporaryFile-objects are closed, and leave no
+        # filehandles open
         for bucket in self.buckets.values():
             for key in bucket.keys.values():
                 if isinstance(key, Key):

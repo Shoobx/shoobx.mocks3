@@ -5,11 +5,11 @@
 ###############################################################################
 """Shoobx S3 Config Test
 """
-import mock
 import os
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
 from shoobx.mocks3 import config
 
@@ -43,4 +43,4 @@ class MockS3ConfigTests(unittest.TestCase):
         with open(config_path, "w") as file:
             file.write(TEST_CONFIG % self._dir)
         # Ensure loading does not fail.
-        app = config.configure(config_path)
+        config.configure(config_path)
