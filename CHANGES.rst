@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.2.4 (unreleased)
+4.2.4 (2023-07-29)
 ------------------
 
 - Updates to moto and boto.
