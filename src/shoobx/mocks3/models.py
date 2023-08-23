@@ -715,8 +715,6 @@ class ShoobxS3Backend(models.S3Backend):
         lock_until=None,
         checksum_value=None,  # noqa
     ):
-        key_name = models.clean_key_name(key_name)
-
         bucket = self.get_bucket(bucket_name)
 
         old_key = bucket.keys.get(key_name, None)

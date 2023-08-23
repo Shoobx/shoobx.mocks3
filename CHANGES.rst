@@ -6,7 +6,7 @@ CHANGELOG
 4.2.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update to moto.
 
 
 4.2.4 (2023-07-29)
