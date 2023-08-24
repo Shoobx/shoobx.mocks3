@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.2.5 (unreleased)
+4.2.5 (2023-08-23)
 ------------------
 
 - Update to moto.
