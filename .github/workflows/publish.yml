@@ -2,6 +2,8 @@ name: docker package publish
 
 on:
   push:
+    tags:
+      "*.*"
 
 env:
   TARGET_PLATFORMS: linux/amd64,linux/arm64
