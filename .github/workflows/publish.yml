@@ -37,5 +37,5 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ghcr.io/andmedoctopus/shoobx.mocks3:${{ github.ref_name }}, ghcr.io/andmedoctopus/shoobx.mocks3:latest
+          tags: ghcr.io/Shoobx/shoobx.mocks3:${{ github.ref_name }}, ghcr.io/Shoobx/shoobx.mocks3:latest
           platforms: ${{ env.TARGET_PLATFORMS }}
