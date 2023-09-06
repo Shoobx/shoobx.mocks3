@@ -34,7 +34,5 @@ jobs:
       - name: Build and push docker image
         uses: docker/build-push-action@v4
         with:
-          tags:
-            - ghcr.io/andmedoctopus/shoobx.mocks3:${{ github.ref_name }}
-            - ghcr.io/andmedoctopus/shoobx.mocks3:latest
+          tags: ghcr.io/andmedoctopus/shoobx.mocks3:${{ github.ref_name }}, ghcr.io/andmedoctopus/shoobx.mocks3:latest
           platforms: ${{ env.TARGET_PLATFORMS }}
