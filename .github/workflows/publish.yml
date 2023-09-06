@@ -20,5 +20,5 @@ jobs:
 
       - name: Build and push the mocks3 docker image
         run: |
-              docker build . --tag ghcr.io/andmedoctopus/shoobx.mocks3:latest
+              docker buildx create --use --name ghcr.io/andmedoctopus/shoobx.mocks3:latest
               docker push ghcr.io/andmedoctopus/shoobx.mocks3:latest
