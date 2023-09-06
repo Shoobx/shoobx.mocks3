@@ -1,0 +1,20 @@
+name: docker package publish
+
+on:
+  push:
+
+jobs:
+  publish-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v2
+        name: Login to GitHub Container Registry
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build the mocks3 docker image
+        run: |
+              docker build . --tag ghcr.io/andmedoctopus/shoobx.mocks3:latest
+              docker push ghcr.io/andmedoctopus/shoobx.mocks3:latest
