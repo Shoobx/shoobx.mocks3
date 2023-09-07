@@ -22,14 +22,23 @@ RUN mkdir var etc
 RUN chown -R $APP_USER:$APP_GROUP $CODE_FOLDER var etc
 
 
-COPY ./config config/
-COPY ./src src/
-COPY README.rst requirements.txt setup.py ./
-RUN pip install .
+COPY . .
+RUN pip install -r requirements.txt
 
-RUN mv ./config/docker.cfg ./etc/mock-s3.cfg
+ENV LOG_LEVEL=INFO \
+    DIRECTORY=./data \
+    HOSTNAME=localhost\
+    RELOAD=True\
+    DEBUG=False\
+    HOST_IP=0.0.0.0 \
+    HOST_PORT=8081 \
+    CORS_ORIGIN=0.0.0.0:8081 \
+    CORS_HEADERS="Origin, ..." \
+    CORS_CREDENTIALS=true \
+    CORS_METHODS="GET, POST, PUT" \
+    CORS_EXPOSE_HEADERS="..."
 
 USER $APP_USER
 EXPOSE 8081
 
-CMD sbx-mocks3-serve -c /shoobx/shoobx.mocks3/etc/mock-s3.cfg
+CMD sbx-mocks3-serve -c /shoobx/shoobx.mocks3/config/docker.cfg
