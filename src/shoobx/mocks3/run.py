@@ -63,12 +63,11 @@ def serve(argv=sys.argv[1:]):
 
     # Start the server.
     conf = config.load_config(args.config_file)
-    host = conf.get("shoobx:server", "host-ip")
-    port = int(conf.get("shoobx:server", "host-port"))
+
     app.run(
-        host=host,
-        port=port,
+        host=conf.server.host_ip,
+        port=conf.server.host_port,
         request_handler=ShoobxRequestHandler,
-        use_reloader=conf.getboolean("shoobx:mocks3", "reload"),
-        use_debugger=conf.getboolean("shoobx:mocks3", "debug"),
+        use_reloader=conf.mocks3.reload,
+        use_debugger=conf.mocks3.debug,
     )
