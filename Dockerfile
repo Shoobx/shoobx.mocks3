@@ -28,4 +28,4 @@ RUN pip install -r requirements.txt
 USER $APP_USER
 EXPOSE 8081
 
-CMD sbx-mocks3-serve -c /shoobx/shoobx.mocks3/config/docker.cfg
+CMD sbx-mocks3-serve -c /dev/null
