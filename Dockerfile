@@ -28,4 +28,6 @@ RUN pip install -r requirements.txt
 USER $APP_USER
 EXPOSE 8081
 
+ENV HOST_PORT=8081
+
 CMD sbx-mocks3-serve -c /dev/null
