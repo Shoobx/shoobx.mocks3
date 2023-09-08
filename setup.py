@@ -60,6 +60,7 @@ setup(
         'moto[server]>=3.0.0',
         'flask_cors',
         'pytz',
+        'pydantic-settings'
     ],
     extras_require=dict(
         test=[

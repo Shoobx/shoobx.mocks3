@@ -7,7 +7,10 @@
 """
 import logging
 import os
+from typing import Optional
 
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from flask_cors import CORS
 from moto import server
 
@@ -18,8 +21,6 @@ except ImportError:
 
 from shoobx.mocks3 import models
 
-_CONFIG = None
-CONFIG_FILE = None
 
 # Define Source code root.
 # pragma: no cover
@@ -35,20 +36,43 @@ SHOOBX_MOCKS3_HOME = os.environ.get("SHOOBX_MOCKS3_HOME", SHOOBX_MOCKS3_HOME)
 log = logging.getLogger("shoobx.mocks3")
 
 
+class ServerConfig(BaseSettings):
+    model_config = SettingsConfigDict(extra='ignore')
+
+    host_ip: str = Field(default="0.0.0.0")
+    host_port: int = Field(default=8003)
+
+class Mocks3Config(BaseSettings):
+    model_config = SettingsConfigDict(extra='ignore')
+
+    log_level: str = Field(default="INFO")
+    log_file: Optional[str] = None
+    directory: str = Field(default="./data")
+    hostname: str = Field(default="localhost")
+    reload: bool = Field(default=True)
+    debug: bool  = Field(default=False)
+
+class Settings(BaseSettings):
+    server: ServerConfig
+    mocks3: Mocks3Config
+
+_CONFIG: Settings = None
+CONFIG_FILE = None
+
 def load_config(config_path):
     global _CONFIG
     if _CONFIG is not None:
         return _CONFIG
-    # Environment variable expansion/interpolation a la supervisor.
-    # Convert all keys to upper case because config parser is case insensitive and
-    # would fail if the key only varies by capitalization.
-    _CONFIG = configparser.ConfigParser(
-        defaults={"ENV_" + k.upper(): v for k, v in os.environ.items()}
-    )
-
+    config_file = configparser.ConfigParser()
+    #
     # Load from config files. It will load from all files, with last one
     # winning if there are multiple files.
-    _CONFIG.read(config_path)
+    config_file.read(config_path)
+
+    _CONFIG = Settings(
+        mocks3=Mocks3Config(**config_file['shoobx:mocks3'] if config_file.has_section('shoobx:mocks3') else {}),
+        server=ServerConfig(**config_file['shoobx:server'] if config_file.has_section('shoobx:server') else {}),
+    )
 
     return _CONFIG
 
@@ -57,14 +81,11 @@ def configure(config_file):
     config = load_config(config_file)
 
     # Setup logging.
-    filename = None
-    if config.has_option("shoobx:mocks3", "log-file"):
-        filename = config.get("shoobx:mocks3", "log-file")
     logging.basicConfig(
-        filename=filename, level=config.get("shoobx:mocks3", "log-level")
+        filename=config.mocks3.log_file, level=config.mocks3.log_level
     )
 
-    directory = config.get("shoobx:mocks3", "directory")
+    directory = config.mocks3.directory
     models.s3_backends[models.MOTO_DEFAULT_ACCOUNT_ID]["global"].directory = directory
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -78,6 +99,6 @@ def configure(config_file):
 
     return app.get_application(
         {
-            "HTTP_HOST": config.get("shoobx:mocks3", "hostname"),
+            "HTTP_HOST": config.mocks3.hostname,
         }
     )
