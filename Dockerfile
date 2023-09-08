@@ -25,19 +25,6 @@ RUN chown -R $APP_USER:$APP_GROUP $CODE_FOLDER var etc
 COPY . .
 RUN pip install -r requirements.txt
 
-ENV LOG_LEVEL=INFO \
-    DIRECTORY=./data \
-    HOSTNAME=localhost\
-    RELOAD=True\
-    DEBUG=False\
-    HOST_IP=0.0.0.0 \
-    HOST_PORT=8081 \
-    CORS_ORIGIN=0.0.0.0:8081 \
-    CORS_HEADERS="Origin, ..." \
-    CORS_CREDENTIALS=true \
-    CORS_METHODS="GET, POST, PUT" \
-    CORS_EXPOSE_HEADERS="..."
-
 USER $APP_USER
 EXPOSE 8081
 
