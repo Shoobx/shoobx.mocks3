@@ -5,6 +5,7 @@
 ###############################################################################
 """Application Configuration
 """
+from configparser import ConfigParser
 import logging
 import os
 
@@ -35,20 +36,49 @@ SHOOBX_MOCKS3_HOME = os.environ.get("SHOOBX_MOCKS3_HOME", SHOOBX_MOCKS3_HOME)
 log = logging.getLogger("shoobx.mocks3")
 
 
+def fill_config(config_path):
+    """
+    Config priority
+
+    default values -> config -> env
+    """
+    config = ConfigParser()
+    default_values = {
+        "shoobx:mocks3":{
+            "log-level": "INFO",
+            "directory": "./data",
+            "hostname": "localhost",
+            "reload": "True",
+            "debug": "False",
+        },
+        "shoobx:server": {
+            "host-ip": "0.0.0.0",
+            "host-port": "8003"
+        }
+    }
+
+    for section, option in default_values.items():
+        config[section] = {}
+        for key, value in option.items():
+            config[section][key] = value
+    config.read(config_path)
+
+    for section in config.sections():
+        for key in config[section]:
+            os_key = key.upper().replace('-', '_')
+            if os_key in os.environ:
+                config[section][key] = os.environ[os_key]
+    return config
+
+
 def load_config(config_path):
     global _CONFIG
     if _CONFIG is not None:
         return _CONFIG
-    # Environment variable expansion/interpolation a la supervisor.
-    # Convert all keys to upper case because config parser is case insensitive and
-    # would fail if the key only varies by capitalization.
-    _CONFIG = configparser.ConfigParser(
-        defaults={"ENV_" + k.upper(): v for k, v in os.environ.items()}
-    )
 
     # Load from config files. It will load from all files, with last one
     # winning if there are multiple files.
-    _CONFIG.read(config_path)
+    _CONFIG = fill_config(config_path)
 
     return _CONFIG
 
