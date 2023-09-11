@@ -44,3 +44,16 @@ class MockS3ConfigTests(unittest.TestCase):
             file.write(TEST_CONFIG % self._dir)
         # Ensure loading does not fail.
         config.configure(config_path)
+
+    def test_configure_override_by_env(self):
+        config_path = os.path.join(self._dir, "config.ini")
+        with open(config_path, "w") as file:
+            file.write(TEST_CONFIG % self._dir)
+        # Ensure loading does not fail.
+        app_config = config.load_config(config_path)
+
+        self.assertEqual(app_config["shoobx:mocks3"]["log-level"], "INFO")
+        with mock.patch.object(os, "environ", {"LOG_LEVEL": "ERROR"}):
+            config._CONFIG = None
+            app_config = config.load_config(config_path)
+            self.assertEqual(app_config["shoobx:mocks3"]["log-level"], "ERROR")
