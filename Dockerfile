@@ -3,7 +3,9 @@ FROM python:3.11-bullseye
 LABEL org.opencontainers.image.authors="dev@shoobx.com"
 
 
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && \
+    apt-get upgrade -y &&\
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 ARG APP_USER=shoobx\
     APP_GROUP=shoobx\
@@ -17,17 +19,9 @@ RUN groupadd --gid $GROUP_ID --non-unique $APP_GROUP && \
 
 WORKDIR $CODE_FOLDER
 
-RUN mkdir var etc
-
-RUN chown -R $APP_USER:$APP_GROUP $CODE_FOLDER var etc
-
-
 COPY . .
 RUN pip install -r requirements.txt
 
 USER $APP_USER
-EXPOSE 8081
 
-ENV HOST_PORT=8081
-
-CMD sbx-mocks3-serve -c /dev/null
+CMD sbx-mocks3-serve
