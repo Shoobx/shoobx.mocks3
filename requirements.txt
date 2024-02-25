@@ -10,9 +10,9 @@
 #
 # Moto v5 is incompatible with current mocks3 implementation
 
-moto[server]==4.2.10
+moto[server]==4.2.14
 
-boto3==1.34.29
+boto3==1.34.48
 flask_cors==4.0.0
 pytz==2023.4
 

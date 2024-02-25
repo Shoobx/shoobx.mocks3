@@ -467,7 +467,7 @@ class Multipart:
 
         etag = hashlib.md5()
         etag.update(bytes(md5s))
-        return total, f"{etag.hexdigest()}-{count}"
+        return total, f"{etag.hexdigest()}-{count}", None
 
     def get_part(self, part_id):
         part = Part(self, part_id)
@@ -783,8 +783,8 @@ class ShoobxS3Backend(models.S3Backend):
     def complete_multipart_upload(self, bucket_name, multipart_id, body):
         bucket = self.get_bucket(bucket_name)
         multipart = bucket.multiparts[multipart_id]
-        value, etag = multipart.complete(body)
-        return multipart, value, etag
+        value, etag, checksum = multipart.complete(body)
+        return multipart, value, etag, checksum
 
     def reset(self):
         # For every key and multipart, Moto opens a TemporaryFile to write the value of

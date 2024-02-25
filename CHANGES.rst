@@ -6,7 +6,7 @@ CHANGELOG
 4.2.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Updates to mooto 4.2.14.
 
 
 4.2.5 (2023-08-23)
