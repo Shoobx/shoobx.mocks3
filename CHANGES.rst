@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.2.7 (unreleased)
+4.2.7 (2024-02-25)
 ------------------
 
 - Fix broken pre-release.
