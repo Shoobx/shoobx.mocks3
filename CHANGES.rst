@@ -6,7 +6,7 @@ CHANGELOG
 4.2.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix broken pre-release.
 
 
 4.2.6 (2024-02-25)
