@@ -18,23 +18,21 @@ Shoobx Mock S3 Server
    :alt: Maintainability
 
 This package implements a mock S3 server including bucket shadowing
-support. The code is based on the `moto` package by implementing a custom
+support. The code is based on the ``moto`` package by implementing a custom
 service.
 
 Configure Docker image with environment variables
 -------------------------------------------------
 
-If you want to change variable from config use next patter `{section}_{name}_{variable}.` For example you want to change directory for `shoobx:mocks3` section:
+If you want to change variable from config use next patter ``{section}_{name}_{variable}.`` For example you want to change directory for ``shoobx:mocks3`` section::
 
-```
-[shoobx:mocks3]
-log-level = INFO
-directory = ./data
+   [shoobx:mocks3]
+   log-level = INFO
+   directory = ./data
 
-[bar:boo]
-baz = foo
-```
+   [bar:boo]
+   baz = foo
 
-To change it use `SHOOBX_MOCKS3_DIRECTORY=/some/path/to/folder`.
+To change it use ``SHOOBX_MOCKS3_DIRECTORY=/some/path/to/folder``.
 
-For `baz` accordingly `BAR_BOO_BAZ=MyValue`
+For ``baz`` accordingly ``BAR_BOO_BAZ=MyValue``
