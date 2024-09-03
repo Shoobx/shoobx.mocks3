@@ -53,7 +53,7 @@ class MockS3ConfigTests(unittest.TestCase):
         app_config = config.load_config(config_path)
 
         self.assertEqual(app_config["shoobx:mocks3"]["log-level"], "INFO")
-        with mock.patch.object(os, "environ", {"LOG_LEVEL": "ERROR"}):
+        with mock.patch.object(os, "environ", {"SHOOBX_MOCKS3_LOG_LEVEL": "ERROR"}):
             config._CONFIG = None
             app_config = config.load_config(config_path)
             self.assertEqual(app_config["shoobx:mocks3"]["log-level"], "ERROR")
