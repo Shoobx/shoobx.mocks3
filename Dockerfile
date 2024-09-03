@@ -20,7 +20,7 @@ RUN groupadd --gid $GROUP_ID --non-unique $APP_GROUP && \
 USER $APP_USER
 WORKDIR $CODE_FOLDER
 
-COPY . .
+COPY --chown=$APP_USER:$APP_GROUP . .
 RUN pip install -r requirements.txt
 
 
