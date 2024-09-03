@@ -17,11 +17,11 @@ RUN groupadd --gid $GROUP_ID --non-unique $APP_GROUP && \
     useradd --no-log-init --uid $USER_ID --non-unique --gid $GROUP_ID --create-home --shell /bin/bash $APP_USER && \
     echo Created user $USER_ID and group $GROUP_ID
 
+USER $APP_USER
 WORKDIR $CODE_FOLDER
 
 COPY . .
 RUN pip install -r requirements.txt
 
-USER $APP_USER
 
 CMD sbx-mocks3-serve
