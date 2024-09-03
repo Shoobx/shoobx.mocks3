@@ -7,8 +7,8 @@ RUN apt-get update && \
     apt-get upgrade -y vim && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-ARG APP_USER=shoobx\
-    APP_GROUP=shoobx\
+ARG APP_USER=shoobx \
+    APP_GROUP=shoobx \
     CODE_FOLDER=/shoobx/shoobx.mocks3 \
     USER_ID=2000 \
     GROUP_ID=2000
