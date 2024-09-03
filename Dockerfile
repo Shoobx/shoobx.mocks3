@@ -4,7 +4,7 @@ LABEL org.opencontainers.image.authors="dev@shoobx.com"
 
 
 RUN apt-get update && \
-    apt-get upgrade -y &&\
+    apt-get upgrade -y vim && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 ARG APP_USER=shoobx\
