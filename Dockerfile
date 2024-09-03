@@ -24,4 +24,4 @@ COPY . .
 RUN pip install -r requirements.txt
 
 
-CMD sbx-mocks3-serve
+CMD ["sbx-mocks3-serve"]
