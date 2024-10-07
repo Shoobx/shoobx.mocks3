@@ -24,7 +24,7 @@ WORKDIR $CODE_FOLDER
 COPY --chown=$APP_USER:$APP_GROUP . .
 ENV PATH="$PATH:$APP_HOME/.local/bin"
 
-RUN --mount=type=cache,id=shoobx-pip,target=/root/.cache/pip,sharing=locked \
+RUN --mount=type=cache,id=pip-cache,target=/home/shoobx/.cache/pip,sharing=locked \
     pip install -r requirements.txt
 
 CMD ["sbx-mocks3-serve"]
