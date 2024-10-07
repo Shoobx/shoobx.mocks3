@@ -1,11 +1,11 @@
-FROM python:3.11-bullseye
+FROM python:3.11-slim
 
 LABEL org.opencontainers.image.authors="dev@shoobx.com"
 
 
-RUN apt-get update && \
-    apt-get upgrade -y vim && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+RUN apt update && \
+    apt upgrade -y vim && \
+    apt clean
 
 ARG APP_USER=shoobx \
     APP_GROUP=shoobx \
@@ -24,7 +24,7 @@ WORKDIR $CODE_FOLDER
 COPY --chown=$APP_USER:$APP_GROUP . .
 ENV PATH="$PATH:$APP_HOME/.local/bin"
 
-RUN pip install -r requirements.txt
-
+RUN --mount=type=cache,id=shoobx-pip,target=/root/.cache/pip,sharing=locked \
+    pip install -r requirements.txt
 
 CMD ["sbx-mocks3-serve"]
