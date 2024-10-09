@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.2.8 (unreleased)
+4.2.8 (2024-10-09)
 ------------------
 
 - Make docker image smaller
