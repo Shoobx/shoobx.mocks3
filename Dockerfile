@@ -3,10 +3,10 @@ FROM ${PULL_REPO}/python:3.11-slim
 
 LABEL org.opencontainers.image.authors="dev@shoobx.com"
 
-
-RUN apt update && \
-    apt upgrade -y vim && \
-    apt clean
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt \
+    apt update && \
+    apt upgrade -y vim
 
 ARG APP_USER=shoobx \
     APP_GROUP=shoobx \
