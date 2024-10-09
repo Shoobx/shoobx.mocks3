@@ -6,7 +6,8 @@ CHANGELOG
 4.2.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make docker image smaller
+- Fix image permissions
 
 
 4.2.7 (2024-02-25)
