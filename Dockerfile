@@ -1,27 +1,31 @@
-FROM python:3.11-bullseye
+ARG PULL_REPO=docker.io
+FROM ${PULL_REPO}/python:3.11-slim
 
 LABEL org.opencontainers.image.authors="dev@shoobx.com"
 
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt \
+    apt update && \
+    apt upgrade -y vim
 
-RUN apt-get update && \
-    apt-get upgrade -y &&\
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
-
-ARG APP_USER=shoobx\
-    APP_GROUP=shoobx\
+ARG APP_USER=shoobx \
+    APP_GROUP=shoobx \
     CODE_FOLDER=/shoobx/shoobx.mocks3 \
     USER_ID=2000 \
     GROUP_ID=2000
 
+ENV APP_HOME=/home/$APP_USER
 RUN groupadd --gid $GROUP_ID --non-unique $APP_GROUP && \
     useradd --no-log-init --uid $USER_ID --non-unique --gid $GROUP_ID --create-home --shell /bin/bash $APP_USER && \
     echo Created user $USER_ID and group $GROUP_ID
 
+USER $APP_USER
 WORKDIR $CODE_FOLDER
 
-COPY . .
-RUN pip install -r requirements.txt
+COPY --chown=$APP_USER:$APP_GROUP . .
+ENV PATH="$PATH:$APP_HOME/.local/bin"
 
-USER $APP_USER
+RUN --mount=type=cache,id=pip-cache,target=/home/shoobx/.cache/pip,sharing=locked \
+    pip install -r requirements.txt
 
-CMD sbx-mocks3-serve
+CMD ["sbx-mocks3-serve"]

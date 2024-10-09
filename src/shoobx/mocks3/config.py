@@ -65,7 +65,9 @@ def fill_config(config_path):
 
     for section in config.sections():
         for key in config[section]:
-            os_key = key.upper().replace('-', '_')
+            env_section = section.upper().replace(':', '_')
+            env_key = key.upper().replace('-', '_')
+            os_key = f"{env_section}_{env_key}"
             if os_key in os.environ:
                 config[section][key] = os.environ[os_key]
     return config
