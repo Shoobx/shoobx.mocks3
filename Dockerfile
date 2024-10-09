@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+ARG PULL_REPO=docker.io
+FROM ${PULL_REPO}/python:3.11-slim
 
 LABEL org.opencontainers.image.authors="dev@shoobx.com"
 
