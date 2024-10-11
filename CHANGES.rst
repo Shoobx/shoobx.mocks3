@@ -9,6 +9,12 @@ CHANGELOG
 - Nothing changed yet.
 
 
+4.2.8.1 (2024-10-11)
+--------------------
+
+- Lock cache for apt for multiartch build
+
+
 4.2.8 (2024-10-09)
 ------------------
 
