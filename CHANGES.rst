@@ -3,10 +3,10 @@ CHANGELOG
 =========
 
 
-4.2.9 (unreleased)
+4.2.8.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Lock cache for apt for multiartch build
 
 
 4.2.8 (2024-10-09)
