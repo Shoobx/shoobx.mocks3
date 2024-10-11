@@ -3,8 +3,8 @@ FROM ${PULL_REPO}/python:3.11-slim
 
 LABEL org.opencontainers.image.authors="dev@shoobx.com"
 
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked  \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked  \
     apt update && \
     apt upgrade -y vim
 
