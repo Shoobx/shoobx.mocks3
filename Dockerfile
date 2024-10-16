@@ -20,7 +20,6 @@ RUN groupadd --gid $GROUP_ID --non-unique $APP_GROUP && \
     echo Created user $USER_ID and group $GROUP_ID
 
 USER $APP_USER
-
 WORKDIR $CODE_FOLDER
 
 COPY --chown=$APP_USER:$APP_GROUP . .
