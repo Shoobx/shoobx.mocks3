@@ -5,14 +5,15 @@
 ###############################################################################
 """Shoobx Mock S3
 """
-from pkg_resources import get_distribution
-
-__version__ = get_distribution("shoobx.mocks3").version
-
 import importlib
+import importlib.metadata
+
+try:
+    __version__ = importlib.metadata.version("shoobx.mocks3")
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "unknown"
 
 import moto.backends
-
 # Insert our custom backend into moto.
 from moto.backends import BACKENDS
 
