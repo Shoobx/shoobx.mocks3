@@ -3,8 +3,8 @@ CHANGELOG
 =========
 
 
-4.2.9 (unreleased)
-------------------
+4.2.10 (2025-02-27)
+-------------------
 
 - Upgrade project metadata to pyproject.toml
 - Replace pkg_resources with importlib
