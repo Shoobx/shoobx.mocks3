@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shoobx.mocks3"
+version = "4.2.9.dev0"
+description = "Shoobx Mock S3 Implementation"
+readme = "README.rst"
+keywords = ["amazon", "aws", "s3", "mock", "moto"]
+license = { text = "Proprietary" }
+authors = [
+    { name = "Shoobx, Inc.", email = "dev@shoobx.com" }
+]
+urls = { "Homepage" = "http://shoobx.com/" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Office/Business",
+]
+dependencies = [
+    "boto3",
+    "moto[server]>=3.0.0",
+    "flask_cors",
+    "pytz"
+]
+
+[project.scripts]
+sbx-mocks3-serve = "shoobx.mocks3.run:serve"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.data-files]
+"config" = ["config/mocks3.cfg", "config/uwsgi.ini"]
+
+[project.optional-dependencies]
+test = [
+    "coverage",
+    "freezegun",
+    "junitxml",
+    "mock",
+    "python-subunit",
+    "pytz",
+    "zope.testrunner"
+]
+dev = ["ipdb", "pdbpp"]

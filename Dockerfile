@@ -5,8 +5,8 @@ LABEL org.opencontainers.image.authors="dev@shoobx.com"
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked  \
     --mount=type=cache,target=/var/lib/apt,sharing=locked  \
-    apt update && \
-    apt upgrade -y vim
+    apt-get update && \
+    apt-get upgrade -y vim
 
 ARG APP_USER=shoobx \
     APP_GROUP=shoobx \
