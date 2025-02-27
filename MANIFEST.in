@@ -6,6 +6,8 @@ include requirements.txt
 include setup.py
 include tox.ini
 include Makefile
+include Dockerfile
+include .dockerignore
 
 recursive-include scripts *.py
 recursive-include src *
