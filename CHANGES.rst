@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.2.11 (unreleased)
+4.2.11 (2025-04-28)
 -------------------
 
 - Rename importlib to avoid problem with metadata attibute override
