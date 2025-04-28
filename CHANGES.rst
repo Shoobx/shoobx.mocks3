@@ -3,10 +3,16 @@ CHANGELOG
 =========
 
 
-4.2.11 (unreleased)
+4.2.12 (unreleased)
 -------------------
 
 - Nothing changed yet.
+
+
+4.2.11 (2025-04-28)
+-------------------
+
+- Rename importlib to avoid problem with metadata attibute override
 
 
 4.2.10 (2025-02-27)
