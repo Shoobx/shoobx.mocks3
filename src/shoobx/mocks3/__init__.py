@@ -6,11 +6,11 @@
 """Shoobx Mock S3
 """
 import importlib
-import importlib.metadata
+import importlib.metadata as importlib_metadata
 
 try:
-    __version__ = importlib.metadata.version("shoobx.mocks3")
-except importlib.metadata.PackageNotFoundError:
+    __version__ = importlib_metadata.version("shoobx.mocks3")
+except importlib_metadata.PackageNotFoundError:
     __version__ = "unknown"
 
 import moto.backends
