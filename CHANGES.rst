@@ -6,7 +6,7 @@ CHANGELOG
 4.2.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix chunked uploads by backporting chunked decode from 5.0
 
 
 4.2.12 (2025-04-28)
