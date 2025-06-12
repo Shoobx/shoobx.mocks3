@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "shoobx.mocks3"
-version = "4.2.14"
+version = "4.2.15.dev0"
 description = "Shoobx Mock S3 Implementation"
 readme = "README.rst"
 keywords = ["amazon", "aws", "s3", "mock", "moto"]
