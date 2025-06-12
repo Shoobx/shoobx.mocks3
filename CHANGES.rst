@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-4.2.13 (unreleased)
+4.2.14 (2025-06-12)
 -------------------
 
 - Fix chunked uploads by backporting chunked decode from 5.0
