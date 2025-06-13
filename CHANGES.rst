@@ -6,7 +6,7 @@ CHANGELOG
 4.2.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Remove python 3.8 support
 
 
 4.2.14 (2025-06-12)

@@ -24,7 +24,7 @@ service.
 Configure Docker image with environment variables
 -------------------------------------------------
 
-If you want to change variable from config use next patter ``{section}_{name}_{variable}.`` For example you want to change directory for ``shoobx:mocks3`` section::
+If you want to change variable from config use next pattern ``{section}_{name}_{variable}.`` For example you want to change directory for ``shoobx:mocks3`` section::
 
    [shoobx:mocks3]
    log-level = INFO
