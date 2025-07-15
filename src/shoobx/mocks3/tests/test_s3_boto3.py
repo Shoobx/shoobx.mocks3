@@ -20,7 +20,7 @@ import botocore
 import requests
 from botocore.client import ClientError, Config
 from freezegun import freeze_time
-from moto.core.models import MockAWS
+from moto import mock_aws
 from moto.s3.models import ALL_USERS_GRANTEE
 
 from shoobx.mocks3 import models
@@ -47,20 +47,20 @@ def reduced_min_part_size(f):
     return wrapped
 
 
+@mock_aws
 class BotoTestCase(unittest.TestCase):
     def setUp(self):
-        self.mock_aws = MockAWS(models.s3_backends)
-        self.mock_aws.start()
-        self._dir = tempfile.mkdtemp()
-        self.data_dir_patch = mock.patch(
-            "shoobx.mocks3.models.ShoobxS3Backend.directory", self._dir
-        )
-        self.data_dir_patch.start()
         self.s3 = boto3.client(
             "s3",
             region_name="us-east-1",
             config=Config(s3={"addressing_style": "path"}),
         )
+        self._dir = tempfile.mkdtemp()
+        self.data_dir_patch = mock.patch(
+            "shoobx.mocks3.models.ShoobxS3Backend.directory", new_callable=mock.PropertyMock, return_value=self._dir
+        )
+
+        self.data_dir_patch.start()
         self.s3.create_bucket(Bucket="mybucket")
         # Create s3 bucket resource using same cfg for simpler tests
         self.s3_resource = boto3.resource(
@@ -73,7 +73,7 @@ class BotoTestCase(unittest.TestCase):
     def tearDown(self):
         self.data_dir_patch.stop()
         shutil.rmtree(self._dir)
-        self.mock_aws.stop()
+        # self.mock_aws.stop()
 
     def store_key(self, name, body, bucket="mybucket", storageClass="STANDARD"):
         self.s3.put_object(

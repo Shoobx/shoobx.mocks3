@@ -18,12 +18,13 @@ import pytz
 import requests.structures
 from moto import settings
 from moto.cloudformation.exceptions import UnformattedGetAttTemplateException
-from moto.core import BackendDict
+from moto.core.base_backend import BackendDict
 from moto.core.utils import (
     iso_8601_datetime_with_milliseconds,
     iso_8601_datetime_without_milliseconds_s3,
     rfc_1123_datetime,
 )
+from moto.utilities.utils import get_partition
 from moto.s3 import models
 
 
@@ -124,6 +125,7 @@ class Key(models.FakeKey):
     ):
         self.bucket = bucket
         self.name = name
+
         self.version = version
         self._is_versioned = is_versioned
         self.multipart = multipart
@@ -141,6 +143,7 @@ class Key(models.FakeKey):
         self._tick = 0
         self.disposed = None
         self.checksum_algorithm = "md5"
+        self.partition = get_partition(None)
 
     def __getstate__(self):
         return self.__dict__.copy()
@@ -149,11 +152,11 @@ class Key(models.FakeKey):
         self.__dict__.update({k: v for k, v in state.items() if k != "value"})
 
     @property
-    def _version_id(self):
+    def version_id(self):
         return self.version
 
-    @_version_id.setter
-    def _version_id(self, value):
+    @version_id.setter
+    def version_id(self, value):
         self.version = value
 
     @property
@@ -255,7 +258,7 @@ class Key(models.FakeKey):
         new_versioned_path = os.path.join(new_path, str(self.version))
         shutil.copytree(self._versioned_path, new_versioned_path)
         return Key(
-            self.bucket, new_name, version=self.version, is_versioned=new_is_versioned
+            self.bucket, new_name, bucket_name=self.bucket_name, version=self.version, is_versioned=new_is_versioned
         )
 
     def set_metadata(self, metadata, replace=False):
@@ -527,10 +530,12 @@ class Bucket(models.FakeBucket):
     versioning_status = _InfoProperty("versioning_status")
     acl = _AclProperty("acl")
 
-    def __init__(self, s3, name):
+    def __init__(self, s3, name, account_id, region_name):
         self.s3 = s3
         self.name = name
         self.region_name = None
+        self.account_id = account_id
+        self.partition = get_partition(region_name)
 
         self.cors = []
         self.logging = {}
@@ -543,6 +548,7 @@ class Bucket(models.FakeBucket):
         self.default_lock_mode = ""
         self.default_lock_days = 0
         self.default_lock_years = 0
+        self.partition = None
 
         self._path = os.path.join(s3.directory, self.name + ".bucket")
         self._info_path = os.path.join(self._path, "info.json")
@@ -654,6 +660,7 @@ class Bucket(models.FakeBucket):
 
 
 class ShoobxS3Backend(models.S3Backend):
+
     def __init__(self, region_name="us-east-42", account_id="deadbeef00d"):
         self.region_name = region_name
         self.account_id = account_id
@@ -677,20 +684,20 @@ class ShoobxS3Backend(models.S3Backend):
         return backend_urls_module
 
     def create_bucket(self, bucket_name, region_name):
-        new_bucket = Bucket(self, bucket_name)
+        new_bucket = Bucket(self, bucket_name, MOTO_DEFAULT_ACCOUNT_ID, region_name)
         if new_bucket.exists():
             raise models.BucketAlreadyExists(bucket=bucket_name)
         new_bucket.create(region_name)
 
-    def list_buckets(self):
+    def list_buckets(self, account_id, region_name):
         return [
-            Bucket(self, fn[:-7])
+            Bucket(self, fn[:-7], account_id, region_name)
             for fn in os.listdir(self.directory)
             if fn.endswith(".bucket")
         ]
 
-    def get_bucket(self, bucket_name):
-        bucket = Bucket(self, bucket_name)
+    def get_bucket(self, bucket_name, account_id=None, region_name=None):
+        bucket = Bucket(self, bucket_name, account_id or MOTO_DEFAULT_ACCOUNT_ID, region_name)
         if not bucket.exists():
             raise models.MissingBucket(bucket=bucket_name)
         return bucket
@@ -715,7 +722,7 @@ class ShoobxS3Backend(models.S3Backend):
         lock_until=None,
         checksum_value=None,  # noqa
     ):
-        bucket = self.get_bucket(bucket_name)
+        bucket = self.get_bucket(bucket_name, self.account_id, self.region_name)
 
         old_key = bucket.keys.get(key_name, None)
         if old_key is not None and bucket.is_versioned:
@@ -726,6 +733,7 @@ class ShoobxS3Backend(models.S3Backend):
         new_key = Key(
             bucket,
             key_name,
+            bucket_name=bucket_name,
             version=new_version,
             is_versioned=bucket.is_versioned,
             multipart=multipart,
@@ -741,14 +749,14 @@ class ShoobxS3Backend(models.S3Backend):
         return new_key
 
     def initiate_multipart(self, bucket_name, key_name, metadata):
-        bucket = self.get_bucket(bucket_name)
+        bucket = self.get_bucket(bucket_name, self.account_id, self.region_name)
         new_multipart = Multipart(bucket)
         new_multipart.create(key_name, metadata)
         bucket.multiparts[new_multipart.id] = new_multipart
         return new_multipart
 
     def complete_multipart(self, bucket_name, multipart_id, body):
-        bucket = self.get_bucket(bucket_name)
+        bucket = self.get_bucket(bucket_name, self.account_id, self.region_name)
         multipart = bucket.multiparts[multipart_id]
         value, etag = multipart.complete(body)
         if value is None:
@@ -773,7 +781,7 @@ class ShoobxS3Backend(models.S3Backend):
         sse_encryption,
         kms_key_id,
     ):
-        bucket = self.get_bucket(bucket_name)
+        bucket = self.get_bucket(bucket_name, self.account_id, self.region_name)
         new_multipart = Multipart(bucket, key_name)
         new_multipart.create(key_name, metadata, tags)
         new_multipart.storage = storage_type
@@ -781,7 +789,7 @@ class ShoobxS3Backend(models.S3Backend):
         return new_multipart.id
 
     def complete_multipart_upload(self, bucket_name, multipart_id, body):
-        bucket = self.get_bucket(bucket_name)
+        bucket = self.get_bucket(bucket_name, self.account_id, self.region_name)
         multipart = bucket.multiparts[multipart_id]
         value, etag, checksum = multipart.complete(body)
         return multipart, value, etag, checksum
@@ -804,5 +812,5 @@ s3_backends = BackendDict(
     ShoobxS3Backend,
     service_name="s3",
     use_boto3_regions=False,
-    additional_regions=["global"],
+    additional_regions=["global", "aws"],
 )
