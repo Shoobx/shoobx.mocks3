@@ -133,7 +133,7 @@ class Key(models.FakeKey):
         self._versioned_path = os.path.join(self._path, str(version))
         self._info_path = os.path.join(self._versioned_path, "info.json")
         self._value_path = os.path.join(self._versioned_path, "value")
-        self.bucket_name = bucket_name
+        self.bucket_name = bucket_name or self.bucket.name
         self.encryption = encryption
         self.kms_key_id = kms_key_id
         self.bucket_key_enabled = bucket_key_enabled
@@ -689,9 +689,9 @@ class ShoobxS3Backend(models.S3Backend):
             raise models.BucketAlreadyExists(bucket=bucket_name)
         new_bucket.create(region_name)
 
-    def list_buckets(self, account_id, region_name):
+    def list_buckets(self):
         return [
-            Bucket(self, fn[:-7], account_id, region_name)
+            Bucket(self, fn[:-7], self.account_id, self.region_name)
             for fn in os.listdir(self.directory)
             if fn.endswith(".bucket")
         ]
@@ -699,7 +699,7 @@ class ShoobxS3Backend(models.S3Backend):
     def get_bucket(self, bucket_name, account_id=None, region_name=None):
         bucket = Bucket(self, bucket_name, account_id or MOTO_DEFAULT_ACCOUNT_ID, region_name)
         if not bucket.exists():
-            raise models.MissingBucket(bucket=bucket_name)
+            raise models.MissingBucket(bucket=bucket_name, self.account_id, self.region_name)
         return bucket
 
     def delete_bucket(self, bucket_name):
@@ -721,6 +721,8 @@ class ShoobxS3Backend(models.S3Backend):
         lock_legal_status="OFF",
         lock_until=None,
         checksum_value=None,  # noqa
+        request_method="PUT",
+        disable_notification=False,
     ):
         bucket = self.get_bucket(bucket_name, self.account_id, self.region_name)
 
@@ -755,10 +757,10 @@ class ShoobxS3Backend(models.S3Backend):
         bucket.multiparts[new_multipart.id] = new_multipart
         return new_multipart
 
-    def complete_multipart(self, bucket_name, multipart_id, body):
+    def complete_multipart_upload(self, bucket_name, multipart_id, body):
         bucket = self.get_bucket(bucket_name, self.account_id, self.region_name)
         multipart = bucket.multiparts[multipart_id]
-        value, etag = multipart.complete(body)
+        value, etag, checksum = multipart.complete(body)
         if value is None:
             return
         key = self.put_object(
@@ -787,12 +789,6 @@ class ShoobxS3Backend(models.S3Backend):
         new_multipart.storage = storage_type
         bucket.multiparts[new_multipart.id] = new_multipart
         return new_multipart.id
-
-    def complete_multipart_upload(self, bucket_name, multipart_id, body):
-        bucket = self.get_bucket(bucket_name, self.account_id, self.region_name)
-        multipart = bucket.multiparts[multipart_id]
-        value, etag, checksum = multipart.complete(body)
-        return multipart, value, etag, checksum
 
     def reset(self):
         # For every key and multipart, Moto opens a TemporaryFile to write the value of
