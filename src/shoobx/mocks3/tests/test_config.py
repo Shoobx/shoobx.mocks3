@@ -35,7 +35,7 @@ class MockS3ConfigTests(unittest.TestCase):
         with open(config_path, "w") as file:
             file.write(TEST_CONFIG % self._dir)
         app = config.configure(config_path)
-        self.assertEqual("s3-sbx", app.service)
+        self.assertEqual("s3", app.service)
 
     @mock.patch.object(os, "environ", {"name": "Jane", "NAME": "Joe"})
     def test_configure_dupe_env_key(self):
