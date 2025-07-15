@@ -703,7 +703,7 @@ class ShoobxS3Backend(models.S3Backend):
         return bucket
 
     def delete_bucket(self, bucket_name):
-        bucket = Bucket(self, bucket_name)
+        bucket = Bucket(self, bucket_name, self.account_id, self.region_name)
         return bucket.delete()
 
     def put_object(
