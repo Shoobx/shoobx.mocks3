@@ -699,7 +699,7 @@ class ShoobxS3Backend(models.S3Backend):
     def get_bucket(self, bucket_name, account_id=None, region_name=None):
         bucket = Bucket(self, bucket_name, account_id or MOTO_DEFAULT_ACCOUNT_ID, region_name)
         if not bucket.exists():
-            raise models.MissingBucket(bucket=bucket_name, self.account_id, self.region_name)
+            raise models.MissingBucket(bucket=bucket_name)
         return bucket
 
     def delete_bucket(self, bucket_name):
