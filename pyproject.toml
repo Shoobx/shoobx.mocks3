@@ -31,7 +31,7 @@ classifiers = [
 ]
 dependencies = [
     "boto3",
-    "moto[server]>=3.0.0",
+    "moto[server]>=5.0.0",
     "flask_cors",
     "pytz"
 ]
