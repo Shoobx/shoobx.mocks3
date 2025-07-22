@@ -533,7 +533,7 @@ class Bucket(models.FakeBucket):
     def __init__(self, s3, name, account_id, region_name):
         self.s3 = s3
         self.name = name
-        self.region_name = None
+        self.region_name = region_name
         self.account_id = account_id
         self.partition = get_partition(region_name)
 
