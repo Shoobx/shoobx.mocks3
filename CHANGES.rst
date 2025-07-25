@@ -3,8 +3,8 @@ CHANGELOG
 =========
 
 
-5.0.0 (unreleased)
--------------------
+5.0.0 (2025-07-25)
+------------------
 
 - Update to moto 5.0
 - Remove python 3.8 support
