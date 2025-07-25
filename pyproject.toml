@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "shoobx.mocks3"
-version = "4.2.15.dev0"
+version = "5.0.0.dev0"
 description = "Shoobx Mock S3 Implementation"
 readme = "README.rst"
 keywords = ["amazon", "aws", "s3", "mock", "moto"]
@@ -31,7 +31,7 @@ classifiers = [
 ]
 dependencies = [
     "boto3",
-    "moto[server]>=3.0.0",
+    "moto[server]>=5.0.0",
     "flask_cors",
     "pytz"
 ]
