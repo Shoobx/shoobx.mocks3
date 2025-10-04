@@ -68,6 +68,8 @@ def serve(argv=sys.argv[1:]):
     app.run(
         host=host,
         port=port,
+        threaded=False,
+        processes=5,
         request_handler=ShoobxRequestHandler,
         use_reloader=conf.getboolean("shoobx:mocks3", "reload"),
         use_debugger=conf.getboolean("shoobx:mocks3", "debug"),
