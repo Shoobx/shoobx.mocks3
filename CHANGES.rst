@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-5.0.1 (unreleased)
+5.1.0 (2025-10-06)
 ------------------
 
 - Serve app using processes rather than threads.
