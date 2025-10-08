@@ -6,7 +6,7 @@ CHANGELOG
 5.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add support custom pip index for docker container.
 
 
 5.1.0 (2025-10-06)
