@@ -25,6 +25,8 @@ WORKDIR $CODE_FOLDER
 COPY --chown=$APP_USER:$APP_GROUP . .
 ENV PATH="$PATH:$APP_HOME/.local/bin"
 
+ARG PIP_INDEX_URL="https://pypi.org/simple"
+ENV PIP_INDEX_URL=$PIP_INDEX_URL
 RUN --mount=type=cache,id=pip-cache,target=/home/shoobx/.cache/pip,sharing=locked \
     pip install -r requirements.txt
 
