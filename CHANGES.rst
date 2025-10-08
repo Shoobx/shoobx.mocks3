@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-5.1.1 (unreleased)
+5.1.1 (2025-10-08)
 ------------------
 
 - Add support custom pip index for docker container.
