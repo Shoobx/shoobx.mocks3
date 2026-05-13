@@ -7,6 +7,7 @@ CHANGELOG
 ------------------
 
 - Support for moto5.2+.
+- Drop support for py3.9 and py3.10. Add py3.12 and py3.13.
 
 
 5.1.1 (2025-10-08)
