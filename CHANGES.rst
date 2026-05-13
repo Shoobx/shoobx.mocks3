@@ -6,7 +6,7 @@ CHANGELOG
 5.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Support for moto5.2+.
 
 
 5.1.1 (2025-10-08)

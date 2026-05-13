@@ -23,7 +23,7 @@ from freezegun import freeze_time
 from moto import mock_aws
 from moto.s3.models import ALL_USERS_GRANTEE
 
-from shoobx.mocks3 import models
+from shoobx.mocks3 import models  # noqa
 
 REDUCED_PART_SIZE = 256
 
@@ -57,7 +57,9 @@ class BotoTestCase(unittest.TestCase):
         )
         self._dir = tempfile.mkdtemp()
         self.data_dir_patch = mock.patch(
-            "shoobx.mocks3.models.ShoobxS3Backend.directory", new_callable=mock.PropertyMock, return_value=self._dir
+            "shoobx.mocks3.models.ShoobxS3Backend.directory",
+            new_callable=mock.PropertyMock,
+            return_value=self._dir,
         )
 
         self.data_dir_patch.start()
@@ -793,7 +795,9 @@ class BotoTestCase(unittest.TestCase):
     def test_setting_content_encoding(self):
         obj = self.bucket.Object("keyname")
         obj.put(Body=b"some value", ContentEncoding="gzip")
-        self.assertEqual("gzip", self.bucket.Object("keyname").content_encoding)
+        self.assertEqual(
+            "gzip,aws-chunked", self.bucket.Object("keyname").content_encoding
+        )
 
     def test_ranged_get(self):
         rep = b"0123456789"
