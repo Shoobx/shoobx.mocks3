@@ -1,8 +1,0 @@
-moto[server]==5.2.1
-
-boto3==1.43.6
-flask_cors==4.0.0
-pytz==2026.2
-
-# shoobx.mocks3
--e .[test]

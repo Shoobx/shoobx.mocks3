@@ -9,6 +9,7 @@ description = "Shoobx Mock S3 Implementation"
 readme = "README.rst"
 keywords = ["amazon", "aws", "s3", "mock", "moto"]
 license = { text = "Proprietary" }
+requires-python = ">=3.11"
 authors = [
     { name = "Shoobx, Inc.", email = "dev@shoobx.com" }
 ]
@@ -45,7 +46,7 @@ where = ["src"]
 [tool.setuptools.data-files]
 "config" = ["config/mocks3.cfg", "config/uwsgi.ini"]
 
-[project.optional-dependencies]
+[proect.optional-dependencies]
 test = [
     "coverage",
     "freezegun",
@@ -56,3 +57,18 @@ test = [
     "zope.testrunner"
 ]
 dev = ["ipdb", "pdbpp"]
+
+[dependency-groups]
+test = [
+    "coverage",
+    "freezegun",
+    "junitxml",
+    "mock",
+    "python-subunit",
+    "pytz",
+    "zope.testrunner"
+]
+dev = ["ipdb", "pdbpp"]
+
+[tool.uv]
+default-groups = ["test", "dev"]
