@@ -68,7 +68,7 @@ test = [
     "pytz",
     "zope.testrunner"
 ]
-dev = ["ipdb", "pdbpp"]
+dev = ["ipdb", "pdbpp", "tox"]
 
 [tool.uv]
 default-groups = ["test", "dev"]
