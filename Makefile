@@ -63,7 +63,7 @@ run-uwsgi: ve
 
 .PHONY: lock
 lock: pyproject.toml
-	uv lock
+	uv lock --exclude-newer "1 day"
 
 .PHONY: pip-compile
 pip-compile: lock
