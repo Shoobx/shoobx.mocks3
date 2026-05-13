@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-5.1.3 (unreleased)
+5.1.3 (2026-05-13)
 ------------------
 
 - Switch to uv and ruff.
