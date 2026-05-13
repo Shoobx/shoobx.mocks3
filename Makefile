@@ -11,6 +11,7 @@ help:
 	@echo "make                -- build everything that needs building"
 	@echo "make test           -- run all tests"
 	@echo "make coverage       -- compute test coverage with coverage.py"
+	@echo "make lock           -- update uv.lock from pyproject.toml requirements"
 	@echo "make clean          -- Remove runtime generated files."
 	@echo "make real-clean     -- Remove all files not in Git."
 	@echo
@@ -30,12 +31,9 @@ real-clean:
 	    src/img2pdf src/migrant src/pjpersist src/z3c.insist src/zodb \
 	    src/zope.i18n src/zope.wfmc
 
-ve: setup.py requirements.txt
+ve: pyproject.toml uv.lock
 	rm -rf ve/
-	$(PYTHON) -m venv ve/
-	ve/bin/pip install --upgrade pip
-	ve/bin/pip install --upgrade setuptools
-	ve/bin/pip install -r ./requirements.txt
+	UV_PROJECT_ENVIRONMENT=ve uv sync --frozen --python $(PYTHON)
 
 ve/bin/test:
 	printf "#!/bin/bash\n$(PWD)/ve/bin/zope-testrunner --test-path $(PWD)/src \$$@\n" > ve/bin/test
@@ -63,7 +61,9 @@ run: ve
 run-uwsgi: ve
 	uwsgi ./config/uwsgi.ini --need-app
 
+.PHONY: lock
+lock: pyproject.toml
+	uv lock --exclude-newer "1 day"
+
 .PHONY: pip-compile
-pip-compile: ve
-	ve/bin/pip install pip-tools
-	ve/bin/pip-compile ./requirements.in --upgrade
+pip-compile: lock

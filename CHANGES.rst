@@ -6,7 +6,7 @@ CHANGELOG
 5.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Switch to uv and ruff.
 
 
 5.1.2 (2026-05-13)
