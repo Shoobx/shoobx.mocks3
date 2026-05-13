@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-5.1.2 (unreleased)
+5.1.2 (2026-05-13)
 ------------------
 
 - Support for moto5.2+.
