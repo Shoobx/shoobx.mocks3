@@ -3,8 +3,8 @@
 # Copyright 2016-2022 by Shoobx, Inc.
 #
 ###############################################################################
-"""Shoobx S3 Backend
-"""
+"""Shoobx S3 Backend"""
+
 import base64
 import codecs
 import collections.abc
@@ -143,7 +143,7 @@ class Key(models.FakeKey):
         self.lock_until = lock_until
         self._tick = 0
         self.disposed = None
-        self.checksum_type = None
+        self.checksum_type = checksum_type
         self.checksum_algorithm = "md5"
         self.partition = get_partition(None)
 
