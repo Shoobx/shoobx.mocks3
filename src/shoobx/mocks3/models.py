@@ -24,8 +24,8 @@ from moto.core.utils import (
     iso_8601_datetime_without_milliseconds_s3,
     rfc_1123_datetime,
 )
-from moto.utilities.utils import get_partition
 from moto.s3 import models
+from moto.utilities.utils import get_partition
 
 
 def _encode_name(name):
@@ -121,6 +121,7 @@ class Key(models.FakeKey):
         lock_mode=None,
         lock_legal_status="OFF",
         lock_until=None,
+        checksum_type=None,
         checksum_value=None,
     ):
         self.bucket = bucket
@@ -142,6 +143,7 @@ class Key(models.FakeKey):
         self.lock_until = lock_until
         self._tick = 0
         self.disposed = None
+        self.checksum_type = None
         self.checksum_algorithm = "md5"
         self.partition = get_partition(None)
 
@@ -238,7 +240,7 @@ class Key(models.FakeKey):
             json.dump(
                 {
                     "last_modified": iso_8601_datetime_without_milliseconds_s3(
-                        datetime.datetime.utcnow()
+                        datetime.datetime.now(datetime.UTC)
                     ),
                     "storage_class": storage,
                     "metadata": {},
@@ -258,7 +260,11 @@ class Key(models.FakeKey):
         new_versioned_path = os.path.join(new_path, str(self.version))
         shutil.copytree(self._versioned_path, new_versioned_path)
         return Key(
-            self.bucket, new_name, bucket_name=self.bucket_name, version=self.version, is_versioned=new_is_versioned
+            self.bucket,
+            new_name,
+            bucket_name=self.bucket_name,
+            version=self.version,
+            is_versioned=new_is_versioned,
         )
 
     def set_metadata(self, metadata, replace=False):
@@ -280,11 +286,11 @@ class Key(models.FakeKey):
             self.create(value)
 
         self.value += self.value
-        self.last_modified = datetime.datetime.utcnow()
+        self.last_modified = datetime.datetime.now(datetime.UTC)
         self._etag = None  # must recalculate etag
 
     def restore(self, days):
-        expiry = datetime.datetime.utcnow() + datetime.timedelta(days)
+        expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days)
         self.expiry_date = expiry.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
     @classmethod
@@ -396,7 +402,7 @@ class Part:
             json.dump(
                 {
                     "last_modified": iso_8601_datetime_with_milliseconds(
-                        datetime.datetime.utcnow()
+                        datetime.datetime.now(datetime.UTC)
                     ),
                     "etag": None,
                 },
@@ -530,7 +536,7 @@ class Bucket(models.FakeBucket):
     versioning_status = _InfoProperty("versioning_status")
     acl = _AclProperty("acl")
 
-    def __init__(self, s3, name, account_id, region_name):
+    def __init__(self, s3, name, account_id, region_name, bucket_namespace=None):
         self.s3 = s3
         self.name = name
         self.region_name = region_name
@@ -549,6 +555,7 @@ class Bucket(models.FakeBucket):
         self.default_lock_days = 0
         self.default_lock_years = 0
         self.partition = None
+        self.bucket_namespace = bucket_namespace
 
         self._path = os.path.join(s3.directory, self.name + ".bucket")
         self._info_path = os.path.join(self._path, "info.json")
@@ -660,7 +667,6 @@ class Bucket(models.FakeBucket):
 
 
 class ShoobxS3Backend(models.S3Backend):
-
     def __init__(self, region_name="us-east-42", account_id="deadbeef00d"):
         self.region_name = region_name
         self.account_id = account_id
@@ -683,13 +689,16 @@ class ShoobxS3Backend(models.S3Backend):
         # No reload is necessary since we don't allow for overwriting urls
         return backend_urls_module
 
-    def create_bucket(self, bucket_name, region_name):
-        new_bucket = Bucket(self, bucket_name, MOTO_DEFAULT_ACCOUNT_ID, region_name)
+    def create_bucket(self, bucket_name, region_name, bucket_namespace=None):
+        new_bucket = Bucket(
+            self, bucket_name, MOTO_DEFAULT_ACCOUNT_ID, region_name, bucket_namespace
+        )
         if new_bucket.exists():
             raise models.BucketAlreadyExists(bucket=bucket_name)
         new_bucket.create(region_name)
+        return new_bucket
 
-    def list_buckets(self):
+    def list_buckets(self, prefix=None, bucket_region=None, max_buckets=None):
         return [
             Bucket(self, fn[:-7], self.account_id, self.region_name)
             for fn in os.listdir(self.directory)
@@ -697,7 +706,9 @@ class ShoobxS3Backend(models.S3Backend):
         ]
 
     def get_bucket(self, bucket_name, account_id=None, region_name=None):
-        bucket = Bucket(self, bucket_name, account_id or MOTO_DEFAULT_ACCOUNT_ID, region_name)
+        bucket = Bucket(
+            self, bucket_name, account_id or MOTO_DEFAULT_ACCOUNT_ID, region_name
+        )
         if not bucket.exists():
             raise models.MissingBucket(bucket=bucket_name)
         return bucket
@@ -720,6 +731,7 @@ class ShoobxS3Backend(models.S3Backend):
         lock_mode=None,
         lock_legal_status="OFF",
         lock_until=None,
+        checksum_type=None,
         checksum_value=None,  # noqa
         request_method="PUT",
         disable_notification=False,
@@ -745,6 +757,7 @@ class ShoobxS3Backend(models.S3Backend):
             lock_mode=lock_mode,
             lock_legal_status=lock_legal_status,
             lock_until=lock_until,
+            checksum_type=checksum_type,
         )
         new_key.create(value=value, storage=storage, etag=etag)
 
@@ -788,7 +801,7 @@ class ShoobxS3Backend(models.S3Backend):
         new_multipart.create(key_name, metadata, tags)
         new_multipart.storage = storage_type
         bucket.multiparts[new_multipart.id] = new_multipart
-        return new_multipart.id
+        return new_multipart
 
     def reset(self):
         # For every key and multipart, Moto opens a TemporaryFile to write the value of
