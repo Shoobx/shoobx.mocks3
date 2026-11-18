@@ -2060,6 +2060,21 @@ dependencies = [
     { name = "pytz" },
 ]
 
+[package.optional-dependencies]
+dev = [
+    { name = "ipdb" },
+    { name = "pdbpp" },
+]
+test = [
+    { name = "coverage" },
+    { name = "freezegun" },
+    { name = "junitxml" },
+    { name = "mock" },
+    { name = "python-subunit" },
+    { name = "pytz" },
+    { name = "zope-testrunner" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "ipdb" },
@@ -2079,10 +2094,20 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "boto3" },
+    { name = "coverage", marker = "extra == 'test'" },
     { name = "flask-cors" },
+    { name = "freezegun", marker = "extra == 'test'" },
+    { name = "ipdb", marker = "extra == 'dev'" },
+    { name = "junitxml", marker = "extra == 'test'" },
+    { name = "mock", marker = "extra == 'test'" },
     { name = "moto", extras = ["server"], specifier = ">=5.2.0" },
+    { name = "pdbpp", marker = "extra == 'dev'" },
+    { name = "python-subunit", marker = "extra == 'test'" },
     { name = "pytz" },
+    { name = "pytz", marker = "extra == 'test'" },
+    { name = "zope-testrunner", marker = "extra == 'test'" },
 ]
+provides-extras = ["test", "dev"]
 
 [package.metadata.requires-dev]
 dev = [

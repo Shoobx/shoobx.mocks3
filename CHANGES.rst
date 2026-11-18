@@ -7,6 +7,7 @@ CHANGELOG
 ------------------
 
 - Update dependencies to latest.
+- Add support for Python 3.14.
 
 
 5.1.3 (2026-05-13)
