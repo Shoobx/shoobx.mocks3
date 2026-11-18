@@ -6,7 +6,7 @@ CHANGELOG
 5.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update dependencies to latest.
 
 
 5.1.3 (2026-05-13)

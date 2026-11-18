@@ -46,7 +46,7 @@ where = ["src"]
 [tool.setuptools.data-files]
 "config" = ["config/mocks3.cfg", "config/uwsgi.ini"]
 
-[proect.optional-dependencies]
+[project.optional-dependencies]
 test = [
     "coverage",
     "freezegun",
