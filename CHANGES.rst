@@ -3,7 +3,7 @@ CHANGELOG
 =========
 
 
-5.1.4 (unreleased)
+5.1.4 (2026-11-18)
 ------------------
 
 - Update dependencies to latest.
