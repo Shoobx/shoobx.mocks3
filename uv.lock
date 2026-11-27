@@ -6,10 +6,6 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 
-[options]
-exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
-exclude-newer-span = "P1D"
-
 [[package]]
 name = "annotated-types"
 version = "0.8.0"
@@ -2050,7 +2046,7 @@ wheels = [
 
 [[package]]
 name = "shoobx-mocks3"
-version = "5.1.4.dev0"
+version = "5.1.5.dev0"
 source = { editable = "." }
 default-groups = ["dev", "test"]
 dependencies = [
@@ -2470,13 +2466,13 @@ wheels = [
 
 [[package]]
 name = "zope-testrunner"
-version = "8.3"
+version = "8.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "zope-exceptions" },
     { name = "zope-interface" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6c/9b/0cd0153944f4e170adea3099abd06ad633faea93e92c1dad23db8d855b90/zope_testrunner-8.3.tar.gz", hash = "sha256:6fef88117314676650829140c2a9038fb7a0b46fd7c01a29dd7f2842bfc614d7", size = 156258, upload-time = "2026-07-30T06:33:56.556Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2a/ef/d154bd8f56dcfb1049fc849787f438ac162d0fd4be0a855dd4ac07b69ad5/zope_testrunner-8.4.tar.gz", hash = "sha256:42f5b99dd2e2f62f0993e7f28e689fa8be4f036a989e0fbfc3b3c8af2820d2ea", size = 156755, upload-time = "2026-11-19T07:58:31.591Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/9a/6a88126959e57676e9bc58f27d54a334e25bf3a6e39c598068681df06bb1/zope_testrunner-8.3-py3-none-any.whl", hash = "sha256:33e73eb4dcfe064605ae9b8152ea1456931e1176aa49a2b2b9f51fef20ba71de", size = 231504, upload-time = "2026-07-30T06:33:54.156Z" },
+    { url = "https://files.pythonhosted.org/packages/62/e8/3c757220a3889f5f68e402e449e705a52ff429316f071d98390c6cd0746b/zope_testrunner-8.4-py3-none-any.whl", hash = "sha256:b93345790a5748b2c57637fcecce9747b403a8b25ba0f078bee28c1ad1b3f6f4", size = 231707, upload-time = "2026-11-19T07:58:29.807Z" },
 ]
